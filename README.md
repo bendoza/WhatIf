@@ -18,6 +18,8 @@ Whether you're an experienced cryptocurrency investor or just starting out, What
 go version
 docker -v
 ```
+### Use your preferred method of cloning the repository to get the WhatIf project within your go/src folder.
+
 ## Initalizing back-end server
 
 ### Navigate to the `server` folder
