@@ -11,7 +11,7 @@ Whether you're an experienced cryptocurrency investor or just starting out, What
 
 ## To get WhatIf working on your machine:
 
-### You must have [Go](https://go.dev),[Docker](https://www.docker.com), and [Node.js] (https://nodejs.org/en/) installed.
+### You must have [Go](https://go.dev),[Docker](https://www.docker.com), and [Node.js](https://nodejs.org/en/) installed.
 
 ### To verify installation, run the following commands:
 ```zsh
