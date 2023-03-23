@@ -11,12 +11,13 @@ Whether you're an experienced cryptocurrency investor or just starting out, What
 
 ## To get WhatIf working on your machine:
 
-### You must have [Go](https://go.dev), and [Docker](https://www.docker.com) installed.
+### You must have [Go](https://go.dev),[Docker](https://www.docker.com), and [Node.js] (https://nodejs.org/en/) installed.
 
 ### To verify installation, run the following commands:
 ```zsh
 go version
 docker -v
+node -v
 ```
 ### Use your preferred method of cloning the repository to get the WhatIf project within your go/src folder.
 
