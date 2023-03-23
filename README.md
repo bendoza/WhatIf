@@ -21,6 +21,25 @@ node -v
 ```
 ### Use your preferred method of cloning the repository to get the WhatIf project within your go/src folder.
 
+## Initalizing front-end server
+
+### Navigate to the `whatif` folder
+```zsh
+cd whatif
+```
+
+### Install all necessary Node.js dependencies
+```zsh
+npm install
+```
+
+### Start up the front-end server
+```zsh
+npm start
+```
+
+### The back end will serve on http://localhost:3000.
+
 ## Initalizing back-end server
 
 ### Navigate to the `server` folder
