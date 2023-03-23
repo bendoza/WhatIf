@@ -38,7 +38,7 @@ npm install
 npm start
 ```
 
-### The back end will serve on http://localhost:3000.
+### The front end will serve on http://localhost:3000.
 
 ## Initalizing back-end server
 
