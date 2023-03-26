@@ -14,8 +14,14 @@ for filename in os.listdir(directory):
         # Open the file for writing
         with open(os.path.join(directory, filename), "w") as file:
             # Loop through each line and write it to the file
+            count = 0
             for line in lines:
-                # Check if the line contains 6 consecutive commas
-                if ",,,,,," not in line:
-                    # If it doesn't, write the line to the file
+                if count == 0:
+                    line = line.replace(",Volume", "")
                     file.write(line)
+                    count += 1
+                else:
+                    values = line.strip().split(",")[:-1]
+                    new_line = ",".join(values) + "\n"
+                    file.write(new_line)
+
