@@ -17,11 +17,12 @@ for filename in os.listdir(directory):
             count = 0
             for line in lines:
                 if count == 0:
-                    line = line.replace(",Volume", "")
+                    line = line.replace("Date,Close", "Date,Close,CryptoID")
                     file.write(line)
                     count += 1
                 else:
-                    values = line.strip().split(",")[:-1]
-                    new_line = ",".join(values) + "\n"
+                    values = line.strip().split(",")
+                    ticker = filename.split("-", 1)[0]
+                    new_line = ",".join(values) + "," + values[0] + ticker + "\n"
                     file.write(new_line)
 
