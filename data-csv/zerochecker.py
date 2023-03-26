@@ -1,18 +1,22 @@
 import os
 
-folder_path = "/Users/bendoza/go/src/WhatIf/data-csv"  # replace with the actual path to your folder
+# Set the directory containing the CSV files
+directory = "/Users/bendoza/go/src/WhatIf/data-csv"
 
-# Loop through all files in the folder
-for filename in os.listdir(folder_path):
-    if filename.endswith(".csv"):
-        with open(os.path.join(folder_path, filename), "r") as file:
-            # Skip the first line
-
-            next(file)
-            # Loop through all remaining lines
-            for line in file:
-                values = line.split(",")
-                # Check if the second through sixth values equal 0.0
-                if float(values[1]) == 0.0 or float(values[2]) == 0.0 or float(values[3]) == 0.0 or float(values[4]) == 0.0 or float(values[5]) == 0.0:
-                    print(filename)
-                    break
+# Loop through each file in the directory
+for filename in os.listdir(directory):
+    # Only consider files with the .csv extension
+    if filename.endswith(".csv") and filename != "crypto-list.csv":
+        # Open the file for reading
+        with open(os.path.join(directory, filename), "r") as file:
+            # Read the file contents into a list of lines
+            lines = file.readlines()
+        # Open the file for writing
+        with open(os.path.join(directory, filename), "w") as file:
+            # Loop through each line and write it to the file
+            for i, line in enumerate(lines):
+                # If it's the first line, remove ",Adj Close" from the end
+                if i == 0:
+                    line = line.replace(",Adj Close", "")
+                # Write the line to the file
+                file.write(line)
