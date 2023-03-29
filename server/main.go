@@ -23,6 +23,8 @@ func main() {
 
 	r.HandleFunc("/signup", h.CreateUser).Methods("POST")
 
+	r.HandleFunc("/login", h.LoginUser).Methods("POST")
+
 	headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
 	origins := handlers.AllowedOrigins([]string{"http://localhost:3000"})
