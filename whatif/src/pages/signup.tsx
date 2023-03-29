@@ -8,9 +8,27 @@ const SignUp = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Handle form submission logic
+    if (password != confirmPassword) {
+      console.error('Passwords do not match.')
+      return
+    }
+    try {
+      const response = await fetch('http://localhost:8008/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ "Email": email, 
+                               "Password": password }),
+
+      });
+      const data = await response.json();
+      console.log(data.Success)
+    } catch (error) {
+      console.error('Error:', error);
+    }
   };
 
   return (
