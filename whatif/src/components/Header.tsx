@@ -1,30 +1,49 @@
+import Link from 'next/link';
+import Image from 'next/image';
 import React from 'react';
-import logo from '../images/Logo1.png';
-import styles from './Header.module.css';
+import logo from '../pictures/Logo1.png';
 
 function Header() {
   return (
-    <div className={styles.header}>
-      <div className={styles.container}>
-        <img src={logo} alt="Logo" style={{ height: '100px', width: '100px' }} />
-
-        <div className={styles.links}>
-          <a href="/" className="text-gray-600 hover:text-blue-500">
-            Home
-          </a>
-          <a href="/features" className="text-gray-600 hover:text-blue-500">
-            Features
-          </a>
-          <a href="/about" className="text-gray-600 hover:text-blue-500">
-            About
-          </a>
-        </div>
-
-        <button className={`bg-blue-500 text-white font-bold ${styles.button}`}>
-          Sign In
-        </button>
+    <header className='flex justify-between p-2 max-w-7xl mx-auto'>
+      <div className='flex items-center space-x-5'>
+        <Link href="/">
+          <div className="w-44">
+            <Image
+              className="object-contain"
+              src={logo.src}
+              alt="Logo"
+              width={200}
+              height={50}
+              layout="responsive"
+            />
+          </div>
+        </Link>
       </div>
-    </div>
+      <div className='hidden md:inline-flex items-center space-x-5'>
+      <Link href="/">
+            <h3 className='text-lg'>Home</h3>
+            </Link>
+        <Link href="/features">
+            <h3 className='text-lg'>Features</h3>
+            </Link>
+            <Link href="/about">
+            <h3 className='text-lg'>About</h3>
+            </Link>
+            <Link href="/follow">
+            <h3 className='text-lg'>Follow</h3>
+            </Link>
+        </div>
+    
+      <div className='flex items-center space-x-5 text-green-600'> 
+      <Link href="/signin">
+        <h3>Sign in</h3>
+        </Link>
+        <Link href="/signup">
+        <h3 className='text-white bg-blue-600 px-4 py-3 rounded-full'>Get started</h3>
+        </Link>
+      </div>
+    </header>
   );
 }
 
