@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/handlers"
+	"log"
 )
 
 func main() {
@@ -19,16 +21,12 @@ func main() {
 
 	r := mux.NewRouter()
 
-	r.HandleFunc("/test", h.HelloHandler2)
+	r.HandleFunc("/signup", h.CreateUser).Methods("POST")
 
-	http.HandleFunc("/", HelloHandler)
-	fmt.Println("Listening on http://localhost:8008/")
-	err = http.ListenAndServe(":8008", nil)
-	if err != nil {
-		panic(err)
-	}
-}
+	r.HandleFunc("/login", h.LoginUser).Methods("POST")
 
-func HelloHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Hello, world!")
+	headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
+	origins := handlers.AllowedOrigins([]string{"http://localhost:3000"})
+	log.Fatal(http.ListenAndServe(":8008", handlers.CORS(headers, methods, origins)(r)))
 }

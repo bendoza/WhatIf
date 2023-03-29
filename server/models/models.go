@@ -16,12 +16,9 @@ type Search struct {
 	dateFrom 	string `json: "datefrom"`
 }
 
-type DailyCryptos {
+type DailyCryptos struct {
 	cryptoID 	string 	`json: "cryptoid"`
 	ticker 		string 	`json: "ticker"`
 	price 		float64 `json: "price"`
 	cryptoDate 	string 	`json: "cryptodate"`
-	dailyVolume int 	`json: "dailyvolume"`
-	dailyHigh 	float64 `json: "dailyhigh"`
-	dailyLow 	float64 `json: "dailylow"`
 }
