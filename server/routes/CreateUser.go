@@ -40,16 +40,15 @@ func (h DBRouter) CreateUser(w http.ResponseWriter, r *http.Request) {
 		// Assigning Email and Password to new User
 		user.Email = requestBody["Email"].(string)
 		user.Password = requestBody["Password"].(string)
-		user.Name = requestBody["Name"].(string)
 
-		stmt, err := h.DB.Prepare("INSERT INTO RegisteredUsers (Email, Password, Name) VALUES (:1, :2, :3)")
+		stmt, err := h.DB.Prepare("INSERT INTO RegisteredUsers (Email, Password) VALUES (:1, :2)")
 		if err != nil {
     		log.Fatal(err)
 		}
 
     	defer stmt.Close()
 
-		_, err = stmt.Exec(user.Email, user.Password, user.Name)
+		_, err = stmt.Exec(user.Email, user.Password)
 		if err != nil {
 			log.Fatal(err)
 		}

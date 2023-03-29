@@ -2,14 +2,33 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import logo from '../pictures/Logo1.png';
+import { useRouter } from 'next/router';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Handle form submission logic
+    try {
+      const response = await fetch('http://localhost:8008/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ "Email": email, 
+                               "Password": password }),
+
+      });
+      const data = await response.json();
+      // Within this if Statement, i'd like to route back to the homepage if true.
+      // Not sure how to accomplish this in React.
+      if (data.LoggedIn == true) {
+        sessionStorage.setItem("loggedIn", data.Email)
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
   };
   
 
@@ -52,7 +71,7 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <Link href="/homepage">
+          {/* <Link href="/homepage"> */}
               <button
                 className="bg-indigo-500 text-white py-2 px-8 rounded-lg hover:bg-indigo-600"
                 type="submit"
@@ -60,8 +79,8 @@ const Login = () => {
                 Log in
               </button>
         
-          </Link>
-          <Link href="/screens/SignUpForm">
+          {/* </Link> */}
+          <Link href="/signup">
             
               <button className="block mt-4 text-center text-indigo-500">
                 Don't have an account? Sign up
