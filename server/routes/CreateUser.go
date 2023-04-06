@@ -32,7 +32,7 @@ func (h DBRouter) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Added a line to check the database for any users with the same email as the new account
-	result, err := h.DB.Query("SELECT * FROM RegisteredUsers WHERE email = :email", sql.Named("email", requestBody["Email"].(string)))
+	result, err := h.DB.Query("SELECT * FROM \"B.MENDOZA\".\"REGISTEREDUSERS\" WHERE email = :email", sql.Named("email", requestBody["Email"].(string)))
 
 	// Checking if the rows that have the email is 0 therefore nobody has the email
 	if result.Next() == false {
@@ -41,7 +41,7 @@ func (h DBRouter) CreateUser(w http.ResponseWriter, r *http.Request) {
 		user.Email = requestBody["Email"].(string)
 		user.Password = requestBody["Password"].(string)
 
-		stmt, err := h.DB.Prepare("INSERT INTO RegisteredUsers (Email, Password) VALUES (:1, :2)")
+		stmt, err := h.DB.Prepare("INSERT INTO \"B.MENDOZA\".\"REGISTEREDUSERS\" (Email, Password) VALUES (:1, :2)")
 		if err != nil {
     		log.Fatal(err)
 		}
