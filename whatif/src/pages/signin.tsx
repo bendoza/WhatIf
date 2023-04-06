@@ -23,6 +23,7 @@ const Login = () => {
       const data = await response.json();
       // Within this if Statement, i'd like to route back to the homepage if true.
       // Not sure how to accomplish this in React.
+      console.log(data)
       if (data.LoggedIn == true) {
         sessionStorage.setItem("loggedIn", data.Email)
       }
