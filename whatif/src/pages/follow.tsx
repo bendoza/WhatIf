@@ -8,13 +8,13 @@ function Follow() {
     {
       name: 'Sergio Arcila',
       position: 'Frontend Developer',
-      bio: 'Sergio is a software engineer with over 10 years of experience. He is responsible for leading the team and ensuring the project stays on track.',
+      bio: 'Sergio is a software engineer with over 10 years of experience. He is responsible for leading the front end team and ensuring the project stays on track.',
       image: 'https://via.placeholder.com/150',
     },
     {
       name: 'Benjamin Mendoza',
       position: 'Backend Developer',
-      bio: 'Jane is a skilled backend developer who specializes in creating efficient and scalable APIs. She has a strong background in Node.js and database design.',
+      bio: 'Ben is a skilled backend developer who specializes in creating efficient and scalable APIs. He has a strong background in Golang and is responsible for leading the back end team.',
       image: 'https://via.placeholder.com/150',
     },
     {
@@ -31,13 +31,22 @@ function Follow() {
     },
   ];
 
+  let isLoggedIn: boolean = false;
+
+  if (typeof window !== 'undefined' && window.sessionStorage) {
+    isLoggedIn = sessionStorage.getItem('loggedIn') != null;
+  } else {
+    console.warn('sessionStorage is not available.');
+  }
+
   return (
+    
     <div className="max-w-7xl mx-auto">
       <Head>
         <title>Follow - WhatIF</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Header />
+      <Header isLoggedIn={isLoggedIn}/>
 
       <div className="p-10">
         <h1 className="text-4xl font-bold mb-10">Our Developers</h1>

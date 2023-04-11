@@ -11,7 +11,7 @@ const SignUp = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (password != confirmPassword) {
-      console.error('Passwords do not match.')
+      console.error('Passwords do not match.');
       return
     }
     try {
@@ -25,7 +25,7 @@ const SignUp = () => {
 
       });
       const data = await response.json();
-      console.log(data.Success)
+      console.log(data.Success);
     } catch (error) {
       console.error('Error:', error);
     }

@@ -4,13 +4,22 @@ import Link from 'next/link';
 import Header from '../components/Header';
 
 function Features() {
+
+  let isLoggedIn: boolean = false;
+
+  if (typeof window !== 'undefined' && window.sessionStorage) {
+    isLoggedIn = sessionStorage.getItem('loggedIn') != null;
+  } else {
+    console.warn('sessionStorage is not available.');
+  }
+
   return (
     <div className="max-w-7xl mx-auto">
       <Head>
         <title>Features - WhatIF</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Header />
+      <Header isLoggedIn={isLoggedIn}/>
 
       <div className="p-10">
         <h1 className="text-4xl font-bold mb-10">Our Best Features</h1>
