@@ -11,7 +11,7 @@ const withAuth = (WrappedComponent: React.ComponentType) => {
         const loggedIn = sessionStorage.getItem('loggedIn') != null;
         setIsLoggedIn(loggedIn);
         if (!loggedIn) {
-          router.replace('/signup');
+          router.replace('/');
         }
       } else {
         console.warn('sessionStorage is not available.');
