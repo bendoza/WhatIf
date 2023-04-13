@@ -7,6 +7,8 @@ import { useRouter } from 'next/router';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -21,20 +23,25 @@ const Login = () => {
 
       });
       const data = await response.json();
-      // Within this if Statement, i'd like to route back to the homepage if true.
-      // Not sure how to accomplish this in React.
       console.log(data);
-      if (data.LoggedIn == true) {
+      if (data.LoggedIn === true) {
         sessionStorage.setItem("loggedIn", data.Email)
+        router.push('/compare');
+      } else {
+        setErrorMessage('Unable to sign in, verify email and password.');
+        setTimeout(() => setErrorMessage(''), 5000);
       }
     } catch (error) {
       console.error('Error:', error);
+      setErrorMessage('An error occurred. Please try again.');
+      setTimeout(() => setErrorMessage(''), 5000);
     }
   };
-  
+
 
   return (
     <div className="bg-black fixed top-0 left-0 h-screen w-screen flex items-center justify-center">
+      {errorMessage && <div className="absolute bottom-3 left-3 bg-red-500 text-white py-2 px-4 rounded-lg">{errorMessage}</div>}
         <Link href="/">
           <h1 className="absolute top-3 left-3 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600">
             Back
@@ -85,13 +92,6 @@ const Login = () => {
             
               <button className="block mt-4 text-center text-indigo-500">
                 Don't have an account? Sign up
-              </button>
-            
-          </Link>
-          <Link href="/screens/GoogleSignIn">
-            
-              <button className="block mt-4 text-center text-indigo-500">
-                Sign In with Google
               </button>
             
           </Link>
