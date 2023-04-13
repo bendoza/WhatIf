@@ -21,7 +21,7 @@ func main() {
 
 	r := mux.NewRouter()
 
-	r.HandleFunc("/", h.GraphPopulate).Methods("POST")
+	r.HandleFunc("/", h.BestDayCrypto).Methods("POST")
 
 	r.HandleFunc("/signup", h.CreateUser).Methods("POST")
 
