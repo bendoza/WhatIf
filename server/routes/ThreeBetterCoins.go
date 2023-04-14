@@ -11,6 +11,9 @@ import (
 	"time"
 )
 
+// Commented, and code producing correct output, although the SQL Queries could be doing more work than what they are doing
+// now. Trying to reduce Go code into more complex SQL query parameters is ideal.
+
 func (h DBRouter) BetterCoinInvestments(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "POST" {
@@ -77,8 +80,8 @@ func (h DBRouter) BetterCoinInvestments(w http.ResponseWriter, r *http.Request) 
 	sqlBuyDate := buy.Format("02-JAN-06")
 	sqlSellDate := sell.Format("02-JAN-06")
 
-	// SQL Query that selects the name, date, and price of all cryptos that have the data on the
-	// explicit start and end date specified by the user.
+	// SQL Query that selects the name, date, and price of all cryptos that explicitly
+	// have data on the start and end date specified by the user.
 	query := `SELECT Ticker, CryptoDate, Price
 			  FROM DAILYCRYPTOS
 			  WHERE Ticker IN (

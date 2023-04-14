@@ -11,6 +11,9 @@ import (
 	"time"
 )
 
+// Commented, and needs work from Lines 123-136, need to loop through the resulting rows in a better way, or query
+// the DB more concisely for the sum of each weekly avg with the same date
+
 func (h DBRouter) GraphPopulate(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "POST" {
@@ -31,6 +34,8 @@ func (h DBRouter) GraphPopulate(w http.ResponseWriter, r *http.Request) {
 	// "TickerValues": [BTC-1.102, ETH-2040.304, etc.]
 	// "BuyDate": "MM/DD/YYYY"
 	// "SellDate": "MM/DD/YYYY"
+
+	// Saving Ticker data straight from request body
 	var TickerValues []string
 
 	if TickerValuesInterface, ok := requestBody["TickerValues"]; ok {
@@ -43,6 +48,8 @@ func (h DBRouter) GraphPopulate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Putting strictly string values into slice for computations but also adding the
+	// string and their amount to a map for computations based on portfolio value
 	TickerValueMap := make(map[string]float64)
 	var Tickers []string
 
@@ -56,12 +63,14 @@ func (h DBRouter) GraphPopulate(w http.ResponseWriter, r *http.Request) {
 		Tickers = append(Tickers, parts[0])
 	}
 
+	// Sorting and creating a TickerString for the embedded SQL queries
 	sort.Strings(Tickers)
-	TickerString := "('" + strings.Join(Tickers, "', '") + "')"
+	var TickerString string = "('" + strings.Join(Tickers, "', '") + "')"
 
 	var BuyDate string = requestBody["BuyDate"].(string)
 	var SellDate string = requestBody["SellDate"].(string)
 
+	// Formatting buy and sell date to be embedded into SQL query
 	buy, err := time.Parse("01/02/2006", BuyDate)
 	if err != nil {
 		log.Fatal(err)
@@ -93,8 +102,15 @@ func (h DBRouter) GraphPopulate(w http.ResponseWriter, r *http.Request) {
 		WeeklyData map[string]float64 `json: "weeklydata"`
 	}
 
+	// Initializing an index for the loop to be more easily taken advantage of
 	var index int = 0
+
+	// Initializing portfolioValue for each coins average weekly value to be added to and ultimately used
+	// as the value that is inserted into the map once all coins for each week have been added
 	var portfolioValue float64 = 0
+
+	// Initializing map for date(key) and weeklyAVGPortfolioValue(value) to be returned to the front end
+	// for graph population
 	weeklyValue := make(map[string]float64)
 
 	for result.Next() {
@@ -107,13 +123,20 @@ func (h DBRouter) GraphPopulate(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 
+		// THIS LOGIC IS NOT FULLY CORRECT. NEED TO FIND A WAY SUM ALL WEEKLY AVERAGE VALUES FROM EACH DATE
+
+		// Multiplying the average value of the ticker by the amount owned by the user to determine
+		// the average worth of each crypto for the week.
+		// Then adding that average worth of each crypto together to get a total average portfolio value of the week
+
+		// THIS LOGIC IS NOT FULLY CORRECT. NEED TO FIND A WAY SUM ALL WEEKLY AVERAGE VALUES FROM EACH DATE
 		portfolioValue += TickerValueMap[ticker] * weeklyAvgValue
 
 		if ticker == Tickers[len(Tickers)-1] && index != 0 {
 			weeklyValue[weekStart.Format("01-02-2006")] = portfolioValue
 			portfolioValue = 0
 		}
-
+		// THIS LOGIC IS NOT FULLY CORRECT. NEED TO FIND A WAY SUM ALL WEEKLY AVERAGE VALUES FROM EACH DATE
 		index++
 	}
 

@@ -5,10 +5,13 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
 )
+
+// Commented, and needs work with the SQL Query, would like to unpack some of the Go code to be parts of the SQL query
 
 func (h DBRouter) WorstSellDay(w http.ResponseWriter, r *http.Request) {
 
@@ -59,7 +62,8 @@ func (h DBRouter) WorstSellDay(w http.ResponseWriter, r *http.Request) {
 		Tickers = append(Tickers, parts[0])
 	}
 
-	// Creating a TickerString for the embedded SQL queries
+	// Sorting and creating a TickerString for the embedded SQL queries
+	sort.Strings(Tickers)
 	var TickerString string = "('" + strings.Join(Tickers, "', '") + "')"
 
 	var BuyDate string = requestBody["BuyDate"].(string)

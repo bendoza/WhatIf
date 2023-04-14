@@ -9,6 +9,9 @@ import (
 	"time"
 )
 
+// Commented, and SQL query concise and complex, although Code is not producing correct output.
+// 1. With a small date range, the results contain data from a date that is not within the date range.
+
 func (h DBRouter) BestDayCrypto(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "POST" {
@@ -29,6 +32,8 @@ func (h DBRouter) BestDayCrypto(w http.ResponseWriter, r *http.Request) {
 	// "TickerValues": [BTC-1.102, ETH-2040.304, etc.]
 	// "BuyDate": "MM/DD/YYYY"
 	// "SellDate": "MM/DD/YYYY"
+
+	// Putting ticker string and values into slice for computations
 	var TickerValues []string
 
 	if TickerValuesInterface, ok := requestBody["TickerValues"]; ok {
@@ -41,6 +46,7 @@ func (h DBRouter) BestDayCrypto(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Putting strictly ticker's string values into slice for computations
 	var Tickers []string
 
 	for _, tv := range TickerValues {
@@ -51,11 +57,13 @@ func (h DBRouter) BestDayCrypto(w http.ResponseWriter, r *http.Request) {
 		Tickers = append(Tickers, parts[0])
 	}
 
+	// Creating a TickerString for the embedded SQL queries
 	TickerString := "('" + strings.Join(Tickers, "', '") + "')"
 
 	var BuyDate string = requestBody["BuyDate"].(string)
 	var SellDate string = requestBody["SellDate"].(string)
 
+	// Formatting buy and sell date to be embedded into SQL query
 	buy, err := time.Parse("01/02/2006", BuyDate)
 	if err != nil {
 		log.Fatal(err)
@@ -69,6 +77,9 @@ func (h DBRouter) BestDayCrypto(w http.ResponseWriter, r *http.Request) {
 	sqlBuyDate := buy.Format("02-JAN-06")
 	sqlSellDate := sell.Format("02-JAN-06")
 
+	// SQL Query that selects the Ticker, the Date, and the % difference in price from all rows of the self join
+	// of DailyCryptos where the ticker is the same, and the dates are consecutive.
+	// Also filters out all rows except the row with the highest percent difference to be returned
 	query := `SELECT c1.Ticker, c2.CryptoDate AS FirstDate, ((c2.Price - c1.Price) / c1.Price) * 100 AS PercentIncrease
 			  FROM DAILYCRYPTOS c1
 			  JOIN DAILYCRYPTOS c2 ON c1.Ticker = c2.Ticker AND c1.CryptoDate = c2.CryptoDate - 1
@@ -83,10 +94,12 @@ func (h DBRouter) BestDayCrypto(w http.ResponseWriter, r *http.Request) {
 	}
 	defer result.Close()
 
+	// Initializing variables to store information from table row scan
 	var ticker string
 	var date time.Time
 	var percentIncrease float64
 
+	// Scanning the one row that is turned by the SQL Query
 	if result.Next() {
 		err = result.Scan(&ticker, &date, &percentIncrease)
 		if err != nil {
@@ -97,6 +110,7 @@ func (h DBRouter) BestDayCrypto(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Establishing a response template
 	type BestDayResponse struct {
 		Ticker          string  `json: "ticker"`
 		Date            string  `json: "date"`
