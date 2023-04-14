@@ -30,6 +30,8 @@ func (h DBRouter) WorstSellDay(w http.ResponseWriter, r *http.Request) {
 	// "TickerValues": [BTC-1.102, ETH-2040.304, etc.]
 	// "BuyDate": "MM/DD/YYYY"
 	// "SellDate": "MM/DD/YYYY"
+
+	// Saving Ticker data straight from request body
 	var TickerValues []string
 
 	if TickerValuesInterface, ok := requestBody["TickerValues"]; ok {
@@ -42,6 +44,8 @@ func (h DBRouter) WorstSellDay(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Putting strictly string values into slice for computations but also adding the
+	// string and their amount to a map for computations based on portfolio value
 	TickerValueMap := make(map[string]float64)
 	var Tickers []string
 
@@ -55,11 +59,13 @@ func (h DBRouter) WorstSellDay(w http.ResponseWriter, r *http.Request) {
 		Tickers = append(Tickers, parts[0])
 	}
 
+	// Creating a TickerString for the embedded SQL queries
 	var TickerString string = "('" + strings.Join(Tickers, "', '") + "')"
 
 	var BuyDate string = requestBody["BuyDate"].(string)
 	var SellDate string = requestBody["SellDate"].(string)
 
+	// Formatting buy and sell date to be embedded into SQL query
 	buy, err := time.Parse("01/02/2006", BuyDate)
 	if err != nil {
 		log.Fatal(err)
@@ -73,6 +79,7 @@ func (h DBRouter) WorstSellDay(w http.ResponseWriter, r *http.Request) {
 	sqlBuyDate := buy.Format("02-JAN-06")
 	sqlSellDate := sell.Format("02-JAN-06")
 
+	// SQL Query that selects the name, date, and price of all cryptos selected by the user within the given date range.
 	query := `SELECT Ticker, CryptoDate, Price
 			  FROM DAILYCRYPTOS
 	  		  WHERE Ticker IN ` + TickerString + ` 
@@ -86,13 +93,19 @@ func (h DBRouter) WorstSellDay(w http.ResponseWriter, r *http.Request) {
 	}
 	defer result.Close()
 
+	// Initializing an index and a bool for the loop to be more easily taken advantage of
 	var index int = 0
 	var first bool = true
+
+	// Initializing dailyPortfolioValue and the map for the total portfolio value of each day where the day
+	// is the key and the value of the portfolio on that day is the value of the key
 	var dailyPortfolioValue float64 = 0
 	dailyValues := make(map[string]float64)
 
+	// Initializing an initial value which will eventually be replaced with a
 	var initialValue float64 = 0
 
+	// Looping through all tuples from within the date range
 	for result.Next() {
 		var ticker string
 		var date time.Time
@@ -103,9 +116,13 @@ func (h DBRouter) WorstSellDay(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 
+		// Using the before mentioned map of the ticker and their amounts to calculate the total value of the portfolio
+		// by using the price from the SQL query
 		dailyPortfolioValue += TickerValueMap[ticker] * dailyValue
 
-		if (index+1)%len(Tickers) == 0 {
+		// Condition that allows the loop to switch from day to day by checking if the ticker is at the end of the list
+		// Before resetting for the next day, it adds the date and the portfolio value to the new map
+		if ticker == Tickers[len(Tickers)-1] && index != 0 {
 			if first {
 				initialValue = dailyPortfolioValue
 				first = false
@@ -116,6 +133,8 @@ func (h DBRouter) WorstSellDay(w http.ResponseWriter, r *http.Request) {
 		index++
 	}
 
+	// Now checking for the map value that has the absolute least of all potentially daily portfolio values and storing
+	// both the date and value in variables to be returned
 	var leastDate string
 	var leastValue float64 = 0
 
@@ -126,6 +145,7 @@ func (h DBRouter) WorstSellDay(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Calculating the percentage difference between the portfolio value of the first day selected and the value of the day with the least portfolio value
 	var percentDifference float64 = ((leastValue - initialValue) / initialValue) * 100
 
 	// Establishing a response template
@@ -147,6 +167,7 @@ func (h DBRouter) WorstSellDay(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	// Write JSON response
 	w.Write(jsonResponse)
 }

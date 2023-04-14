@@ -3,9 +3,9 @@ package routes
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -56,6 +56,7 @@ func (h DBRouter) GraphPopulate(w http.ResponseWriter, r *http.Request) {
 		Tickers = append(Tickers, parts[0])
 	}
 
+	sort.Strings(Tickers)
 	TickerString := "('" + strings.Join(Tickers, "', '") + "')"
 
 	var BuyDate string = requestBody["BuyDate"].(string)
@@ -108,11 +109,11 @@ func (h DBRouter) GraphPopulate(w http.ResponseWriter, r *http.Request) {
 
 		portfolioValue += TickerValueMap[ticker] * weeklyAvgValue
 
-		if (index+1)%len(Tickers) == 0 {
+		if ticker == Tickers[len(Tickers)-1] && index != 0 {
 			weeklyValue[weekStart.Format("01-02-2006")] = portfolioValue
 			portfolioValue = 0
-			fmt.Println(weekStart.Format("01-02-2006"), weeklyValue[weekStart.Format("01-02-2006")])
 		}
+
 		index++
 	}
 
