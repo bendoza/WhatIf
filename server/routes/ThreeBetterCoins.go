@@ -11,7 +11,8 @@ import (
 	"time"
 )
 
-// Commented, and code producing correct output, although the SQL Queries could be doing more work than what they are doing
+// Code producing correct output
+// Commented, although the SQL Queries could be doing more work than what they are doing
 // now. Trying to reduce Go code into more complex SQL query parameters is ideal.
 
 func (h DBRouter) BetterCoinInvestments(w http.ResponseWriter, r *http.Request) {

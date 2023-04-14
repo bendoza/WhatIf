@@ -9,7 +9,8 @@ import (
 	"time"
 )
 
-// Commented, and SHOULD be FINISHED, query is ACCURATE and COMPLEX, and shows exactly what we are asking for
+// Code producing correct output
+// Commented, and SHOULD be FINISHED, query is ACCURATE and COMPLEX
 
 func (h DBRouter) BestMarketDay(w http.ResponseWriter, r *http.Request) {
 

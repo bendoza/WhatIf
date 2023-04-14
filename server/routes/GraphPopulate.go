@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+// Code can produce incorrect output.
 // Commented, and needs work from Lines 123-136, need to loop through the resulting rows in a better way, or query
 // the DB more concisely for the sum of each weekly avg with the same date
 

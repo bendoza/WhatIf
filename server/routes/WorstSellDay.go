@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+// Code can produce incorrect output.
 // Commented, and needs work with the SQL Query, would like to unpack some of the Go code to be parts of the SQL query
 
 func (h DBRouter) WorstSellDay(w http.ResponseWriter, r *http.Request) {

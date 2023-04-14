@@ -9,8 +9,9 @@ import (
 	"time"
 )
 
-// Commented, and SQL query concise and complex, although Code is not producing correct output.
-// 1. With a small date range, the results contain data from a date that is not within the date range.
+// Code can produce incorrect output
+// Commented, and SQL query concise and complex, although Code can produce incorrect output:
+// 					1. With a small date range, the results contain data from a date that is not within the date range.
 
 func (h DBRouter) BestDayCrypto(w http.ResponseWriter, r *http.Request) {
 
