@@ -22,6 +22,8 @@ func main() {
 
 	r := mux.NewRouter()
 
+	r.HandleFunc("/", h.WorstSellDay).Methods("POST")
+
 	r.HandleFunc("/bestMarketDay", h.BestMarketDay).Methods("POST")
 
 	r.HandleFunc("/bestDayCrypto", h.BestDayCrypto).Methods("POST")
