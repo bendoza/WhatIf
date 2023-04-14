@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+// Commented, and SHOULD be FINISHED, query is ACCURATE and COMPLEX, and shows exactly what we are asking for
+
 func (h DBRouter) BestMarketDay(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "POST" {
@@ -29,6 +31,8 @@ func (h DBRouter) BestMarketDay(w http.ResponseWriter, r *http.Request) {
 	// "TickerValues": [BTC-1.102, ETH-2040.304, etc.]
 	// "BuyDate": "MM/DD/YYYY"
 	// "SellDate": "MM/DD/YYYY"
+
+	// Saving Ticker data straight from request body
 	var TickerValues []string
 
 	if TickerValuesInterface, ok := requestBody["TickerValues"]; ok {
@@ -41,6 +45,7 @@ func (h DBRouter) BestMarketDay(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Putting strictly ticker's string values into slice for computations
 	var Tickers []string
 
 	for _, tv := range TickerValues {
@@ -51,11 +56,10 @@ func (h DBRouter) BestMarketDay(w http.ResponseWriter, r *http.Request) {
 		Tickers = append(Tickers, parts[0])
 	}
 
-	// TickerString := "('" + strings.Join(Tickers, "', '") + "')"
-
 	var BuyDate string = requestBody["BuyDate"].(string)
 	var SellDate string = requestBody["SellDate"].(string)
 
+	// Formatting buy and sell date to be embedded into SQL query
 	buy, err := time.Parse("01/02/2006", BuyDate)
 	if err != nil {
 		log.Fatal(err)
@@ -69,9 +73,13 @@ func (h DBRouter) BestMarketDay(w http.ResponseWriter, r *http.Request) {
 	sqlBuyDate := buy.Format("02-JAN-06")
 	sqlSellDate := sell.Format("02-JAN-06")
 
+	// SQL Query that selects the Ticker, and the average % difference in price between two consecutive days for each crypto
+	// where each date is within the specified date range.
+	// Also filters out all rows except the row with the highest percent difference to be returned
+	// So the only row returned has the date with the highest daily percent increase and said percent increase
 	query := `SELECT D2.CryptoDate AS DDate, (AVG(D2.Price) - AVG(D1.Price)) / AVG(D1.Price) AS TotalPriceIncrease
   			  FROM DAILYCRYPTOS D1
-  			  JOIN DAILYCRYPTOS D2 ON D1.Ticker = D2.Ticker AND D2.CryptoDate = D1.CryptoDate + 1
+  			  JOIN DAILYCRYPTOS D2 ON D2.CryptoDate = D1.CryptoDate + 1
   			  WHERE D2.CryptoDate BETWEEN :startDate AND :endDate 
   			  GROUP BY D2.CryptoDate
   			  ORDER BY TotalPriceIncrease DESC
@@ -83,6 +91,7 @@ func (h DBRouter) BestMarketDay(w http.ResponseWriter, r *http.Request) {
 	}
 	defer result.Close()
 
+	// Initializing variables for the scan of the query result's rows
 	var date time.Time
 	var percentIncrease float64
 
@@ -96,6 +105,7 @@ func (h DBRouter) BestMarketDay(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Establishing a response template
 	type BestMarketDayResponse struct {
 		Date            string  `json: "date"`
 		PercentIncrease float64 `json: "percentincrease"`
@@ -106,7 +116,7 @@ func (h DBRouter) BestMarketDay(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	// Setting response map to be the weekly value map created in the loop
-	response := BestMarketDayResponse{Date: date.Format("01/02/2006"), PercentIncrease: percentIncrease}
+	response := BestMarketDayResponse{Date: date.Format("01/02/2006"), PercentIncrease: percentIncrease * 100}
 
 	// Packing response as type JSON
 	jsonResponse, err := json.Marshal(response)
