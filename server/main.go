@@ -1,13 +1,14 @@
 package main
 
 import (
+	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/benmendoza3/WhatIf/database"
 	"github.com/benmendoza3/WhatIf/routes"
-	"fmt"
-	"net/http"
-	"github.com/gorilla/mux"
 	"github.com/gorilla/handlers"
-	"log"
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -20,6 +21,14 @@ func main() {
 	h := routes.NewConnection(db)
 
 	r := mux.NewRouter()
+
+	r.HandleFunc("/", h.WorstSellDay).Methods("POST")
+
+	r.HandleFunc("/bestMarketDay", h.BestMarketDay).Methods("POST")
+
+	r.HandleFunc("/bestDayCrypto", h.BestDayCrypto).Methods("POST")
+
+	r.HandleFunc("/graphPopulate", h.GraphPopulate).Methods("POST")
 
 	r.HandleFunc("/signup", h.CreateUser).Methods("POST")
 
