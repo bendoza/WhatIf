@@ -13,7 +13,7 @@ import (
 
 // Code producing correct output
 // Commented, although the SQL Queries could be doing more work than what they are doing
-// now. Trying to reduce Go code into more complex SQL query parameters is ideal.
+// now. Trying to reduce Go code that follows SQL query for data retrieval into more complex SQL query parameters is ideal.
 
 func (h DBRouter) BetterCoinInvestments(w http.ResponseWriter, r *http.Request) {
 
