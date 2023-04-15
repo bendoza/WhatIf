@@ -11,8 +11,9 @@ import (
 	"time"
 )
 
-// Code can produce incorrect output.
-// Commented, and needs work with the SQL Query, would like to unpack some of the Go code to be parts of the SQL query
+// Not exactly sure about the state out the output, I believe the output is correct, but upon testing I could be proven wrong.
+
+// Commented, and needs work with the SQL Query, I would like to unpack some of the Go code to be parts of the SQL query
 
 func (h DBRouter) WorstSellDay(w http.ResponseWriter, r *http.Request) {
 
@@ -87,8 +88,7 @@ func (h DBRouter) WorstSellDay(w http.ResponseWriter, r *http.Request) {
 	// SQL Query that selects the name, date, and price of all cryptos selected by the user within the given date range.
 	query := `SELECT Ticker, CryptoDate, Price
 			  FROM DAILYCRYPTOS
-	  		  WHERE Ticker IN ` + TickerString + ` 
-	  		  AND CryptoDate BETWEEN :startDate AND :endDate 
+	  		  WHERE Ticker IN ` + TickerString + ` AND CryptoDate BETWEEN :startDate AND :endDate 
 	  		  GROUP BY Ticker, CryptoDate, Price
 	  		  ORDER BY CryptoDate ASC`
 

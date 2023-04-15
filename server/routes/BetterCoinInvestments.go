@@ -15,6 +15,8 @@ import (
 // Code producing correct output
 // Commented, and SHOULD be FINISHED, query is ACCURATE and COMPLEX
 
+// I would like to go in and add to the response, which coin the new cryptos out performed and it's values for each date
+
 func (h DBRouter) BetterCoinInvestments(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "POST" {
@@ -92,8 +94,6 @@ func (h DBRouter) BetterCoinInvestments(w http.ResponseWriter, r *http.Request) 
 			  JOIN DAILYCRYPTOS B ON A.Ticker = B.Ticker
 			  WHERE A.CryptoDate = :startDate AND B.CryptoDate = :endDate
 			  AND A.Ticker NOT IN ` + TickerString + `
-			  AND A.Price != 0
-			  AND B.Price != 0
 			  AND A.Price <> 0
 			  AND ((B.Price - A.Price) / A.Price) > ( SELECT MIN((B.Price - A.Price) / A.Price)
 			  										  FROM DAILYCRYPTOS A
@@ -101,8 +101,6 @@ func (h DBRouter) BetterCoinInvestments(w http.ResponseWriter, r *http.Request) 
 			  										  WHERE A.CryptoDate = :startDate
 			  										  AND B.CryptoDate = :endDate
 			  										  AND A.Ticker IN ` + TickerString + `
-			  										  AND A.Price != 0
-			  										  AND B.Price != 0
 			  										  AND A.Price <> 0
 		  										  )
 			  ORDER BY PercentDifference DESC

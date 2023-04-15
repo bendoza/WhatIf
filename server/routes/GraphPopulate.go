@@ -86,11 +86,10 @@ func (h DBRouter) GraphPopulate(w http.ResponseWriter, r *http.Request) {
 	sqlSellDate := sell.Format("02-Jan-06")
 
 	query := `SELECT Ticker, TRUNC(CryptoDate, 'IW') AS WeekStart, AVG(Price) AS WeeklyAverageValue 
-				FROM DAILYCRYPTOS
-		  		WHERE Ticker IN ` + TickerString + ` 
-		  		AND CryptoDate BETWEEN :startDate AND :endDate 
-		  		GROUP BY Ticker, TRUNC(CryptoDate, 'IW')
-		  		ORDER BY TRUNC(CryptoDate, 'IW'), Ticker ASC`
+			  FROM DAILYCRYPTOS
+			  WHERE Ticker IN ` + TickerString + ` AND CryptoDate BETWEEN :startDate AND :endDate 
+		  	  GROUP BY Ticker, TRUNC(CryptoDate, 'IW')
+			  ORDER BY TRUNC(CryptoDate, 'IW'), Ticker ASC`
 
 	result, err := h.DB.Query(query, sql.Named("startDate", sqlBuyDate), sql.Named("endDate", sqlSellDate))
 	if err != nil {

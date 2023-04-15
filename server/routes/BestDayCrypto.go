@@ -81,11 +81,10 @@ func (h DBRouter) BestDayCrypto(w http.ResponseWriter, r *http.Request) {
 	// SQL Query that selects the Ticker, the Date, and the % difference in price from all rows of the self join
 	// of DailyCryptos where the ticker is the same, and the dates are consecutive.
 	// Also filters out all rows except the row with the highest percent difference to be returned
-	query := `SELECT c1.Ticker, c2.CryptoDate AS FirstDate, ((c2.Price - c1.Price) / c1.Price) * 100 AS PercentIncrease
-			  FROM DAILYCRYPTOS c1
-			  JOIN DAILYCRYPTOS c2 ON c1.Ticker = c2.Ticker AND c1.CryptoDate = c2.CryptoDate - 1
-			  WHERE c1.CryptoDate BETWEEN :startDate AND :endDate
-			  AND c1.Ticker IN ` + TickerString + `
+	query := `SELECT A.Ticker, B.CryptoDate AS FirstDate, ((B.Price - A.Price) / A.Price) * 100 AS PercentIncrease
+			  FROM DAILYCRYPTOS A
+			  JOIN DAILYCRYPTOS B ON A.Ticker = B.Ticker AND A.CryptoDate = B.CryptoDate - 1
+			  WHERE A.CryptoDate BETWEEN :startDate AND :endDate AND A.Ticker IN ` + TickerString + `
 			  ORDER BY PercentIncrease DESC
 			  FETCH FIRST 1 ROWS ONLY`
 

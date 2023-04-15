@@ -78,11 +78,11 @@ func (h DBRouter) BestMarketDay(w http.ResponseWriter, r *http.Request) {
 	// where each date is within the specified date range.
 	// Also filters out all rows except the row with the highest percent difference to be returned
 	// So the only row returned has the date with the highest daily percent increase and said percent increase
-	query := `SELECT D2.CryptoDate AS DDate, (AVG(D2.Price) - AVG(D1.Price)) / AVG(D1.Price) AS TotalPriceIncrease
-  			  FROM DAILYCRYPTOS D1
-  			  JOIN DAILYCRYPTOS D2 ON D2.CryptoDate = D1.CryptoDate + 1
-  			  WHERE D2.CryptoDate BETWEEN :startDate AND :endDate 
-  			  GROUP BY D2.CryptoDate
+	query := `SELECT B.CryptoDate, (AVG(B.Price) - AVG(A.Price)) / AVG(A.Price) AS TotalPriceIncrease
+  			  FROM DAILYCRYPTOS A
+  			  JOIN DAILYCRYPTOS B ON B.CryptoDate = A.CryptoDate + 1
+  			  WHERE B.CryptoDate BETWEEN :startDate AND :endDate 
+  			  GROUP BY B.CryptoDate
   			  ORDER BY TotalPriceIncrease DESC
   			  FETCH FIRST 1 ROWS ONLY`
 
