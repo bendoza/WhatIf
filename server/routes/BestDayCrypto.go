@@ -75,8 +75,8 @@ func (h DBRouter) BestDayCrypto(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	sqlBuyDate := buy.Format("02-JAN-06")
-	sqlSellDate := sell.Format("02-JAN-06")
+	sqlBuyDate := buy.Format("02-Jan-06")
+	sqlSellDate := sell.Format("02-Jan-06")
 
 	// SQL Query that selects the Ticker, the Date, and the % difference in price from all rows of the self join
 	// of DailyCryptos where the ticker is the same, and the dates are consecutive.

@@ -81,8 +81,8 @@ func (h DBRouter) WorstSellDay(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	sqlBuyDate := buy.Format("02-JAN-06")
-	sqlSellDate := sell.Format("02-JAN-06")
+	sqlBuyDate := buy.Format("02-Jan-06")
+	sqlSellDate := sell.Format("02-Jan-06")
 
 	// SQL Query that selects the name, date, and price of all cryptos selected by the user within the given date range.
 	query := `SELECT Ticker, CryptoDate, Price

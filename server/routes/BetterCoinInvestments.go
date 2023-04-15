@@ -3,6 +3,7 @@ package routes
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"sort"
@@ -11,11 +12,10 @@ import (
 	"time"
 )
 
-// Code can produce incorrect output.
-// Commented, and needs work from Lines 123-136, need to loop through the resulting rows in a better way, or query
-// the DB more concisely for the sum of each weekly avg with the same date
+// Code producing correct output
+// Commented, and SHOULD be FINISHED, query is ACCURATE and COMPLEX
 
-func (h DBRouter) GraphPopulate(w http.ResponseWriter, r *http.Request) {
+func (h DBRouter) BetterCoinInvestments(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -85,12 +85,28 @@ func (h DBRouter) GraphPopulate(w http.ResponseWriter, r *http.Request) {
 	sqlBuyDate := buy.Format("02-Jan-06")
 	sqlSellDate := sell.Format("02-Jan-06")
 
-	query := `SELECT Ticker, TRUNC(CryptoDate, 'IW') AS WeekStart, AVG(Price) AS WeeklyAverageValue 
-				FROM DAILYCRYPTOS
-		  		WHERE Ticker IN ` + TickerString + ` 
-		  		AND CryptoDate BETWEEN :startDate AND :endDate 
-		  		GROUP BY Ticker, TRUNC(CryptoDate, 'IW')
-		  		ORDER BY TRUNC(CryptoDate, 'IW'), Ticker ASC`
+	// SQL Query that selects crypto name and overall percent difference from the start date to the end date of the
+	// cryptos with the top 3 highest % differences that are higher than any crypto within the portfolio.
+	query := `SELECT A.Ticker, ((B.Price - A.Price) / A.Price) * 100 AS PercentDifference
+			  FROM DAILYCRYPTOS A
+			  JOIN DAILYCRYPTOS B ON A.Ticker = B.Ticker
+			  WHERE A.CryptoDate = :startDate AND B.CryptoDate = :endDate
+			  AND A.Ticker NOT IN ` + TickerString + `
+			  AND A.Price != 0
+			  AND B.Price != 0
+			  AND A.Price <> 0
+			  AND ((B.Price - A.Price) / A.Price) > ( SELECT MIN((B.Price - A.Price) / A.Price)
+			  										  FROM DAILYCRYPTOS A
+			  										  JOIN DAILYCRYPTOS B ON A.Ticker = B.Ticker
+			  										  WHERE A.CryptoDate = :startDate
+			  										  AND B.CryptoDate = :endDate
+			  										  AND A.Ticker IN ` + TickerString + `
+			  										  AND A.Price != 0
+			  										  AND B.Price != 0
+			  										  AND A.Price <> 0
+		  										  )
+			  ORDER BY PercentDifference DESC
+			  FETCH FIRST 5 ROWS ONLY`
 
 	result, err := h.DB.Query(query, sql.Named("startDate", sqlBuyDate), sql.Named("endDate", sqlSellDate))
 	if err != nil {
@@ -98,58 +114,35 @@ func (h DBRouter) GraphPopulate(w http.ResponseWriter, r *http.Request) {
 	}
 	defer result.Close()
 
-	// Establishing a response template
-	type GraphDataResponse struct {
-		WeeklyData map[string]float64 `json: "weeklydata"`
-	}
-
-	// Initializing an index for the loop to be more easily taken advantage of
+	// Initializing a string slice for all new formatted strings with data
+	var NewTickers []string
+	var placeholder string
 	var index int = 0
 
-	// Initializing portfolioValue for each coins average weekly value to be added to and ultimately used
-	// as the value that is inserted into the map once all coins for each week have been added
-	var portfolioValue float64 = 0
-
-	// Initializing map for date(key) and weeklyAVGPortfolioValue(value) to be returned to the front end
-	// for graph population
-	weeklyValue := make(map[string]float64)
-
+	// Looping through 5 results rows and formatting them to be correctly sent back to the front end
 	for result.Next() {
 		var ticker string
-		var weekStart time.Time
-		var weeklyAvgValue float64
+		var percentDifference float64
 
-		err := result.Scan(&ticker, &weekStart, &weeklyAvgValue)
+		err := result.Scan(&ticker, &percentDifference)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		// THIS LOGIC IS NOT FULLY CORRECT. NEED TO FIND A WAY SUM ALL WEEKLY AVERAGE VALUES FROM EACH DATE
+		percentDiffString := fmt.Sprintf("%f", percentDifference)
+		placeholder = ticker + "-" + percentDiffString
 
-		// Multiplying the average value of the ticker by the amount owned by the user to determine
-		// the average worth of each crypto for the week.
-		// Then adding that average worth of each crypto together to get a total average portfolio value of the week
-
-		// THIS LOGIC IS NOT FULLY CORRECT. NEED TO FIND A WAY SUM ALL WEEKLY AVERAGE VALUES FROM EACH DATE
-		portfolioValue += TickerValueMap[ticker] * weeklyAvgValue
-
-		if ticker == Tickers[len(Tickers)-1] && index != 0 {
-			weeklyValue[weekStart.Format("01-02-2006")] = portfolioValue
-			portfolioValue = 0
-		}
-		// THIS LOGIC IS NOT FULLY CORRECT. NEED TO FIND A WAY SUM ALL WEEKLY AVERAGE VALUES FROM EACH DATE
+		NewTickers = append(NewTickers, placeholder)
 		index++
+
 	}
 
 	// Setting headers
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	// Setting response map to be the weekly value map created in the loop
-	response := GraphDataResponse{WeeklyData: weeklyValue}
-
-	// Packing response as type JSON
-	jsonResponse, err := json.Marshal(response)
+	// Packing NewTickers as type JSON for response
+	jsonResponse, err := json.Marshal(NewTickers)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

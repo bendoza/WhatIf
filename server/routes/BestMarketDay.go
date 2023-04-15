@@ -71,8 +71,8 @@ func (h DBRouter) BestMarketDay(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	sqlBuyDate := buy.Format("02-JAN-06")
-	sqlSellDate := sell.Format("02-JAN-06")
+	sqlBuyDate := buy.Format("02-Jan-06")
+	sqlSellDate := sell.Format("02-Jan-06")
 
 	// SQL Query that selects the Ticker, and the average % difference in price between two consecutive days for each crypto
 	// where each date is within the specified date range.
