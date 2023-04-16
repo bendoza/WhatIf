@@ -31,9 +31,17 @@ const ComparePage: React.FC = () => {
   const [buyDate, setBuyDate] = useState('');
   const [sellDate, setSellDate] = useState('');
 
+  const [selectedCryptos, setSelectedCryptos] = useState<string[]>([]);
+
+  const handleSelectedCryptoStrings = (selectedCryptoStrings: string[]) => {
+    setSelectedCryptos(selectedCryptoStrings);
+  };
+
   const handleCalculateClick = () => {
     console.log('Buy Date:', buyDate);
     console.log('Sell Date:', sellDate);
+
+    console.log('Tickers: ', selectedCryptos)
 
     // Add your calculation logic here
     // and update the results state variables
@@ -58,7 +66,9 @@ const ComparePage: React.FC = () => {
         <div className="bg-gray-200 py-8">
         <div className="container mx-auto">
           <div className="grid grid-cols-2 gap-4 p-4 bg-white rounded shadow-md">
-            <CryptoSelection />
+            <CryptoSelection
+            onSelectedCryptoStrings={handleSelectedCryptoStrings}
+            />
             <DateSelection
               buyDate={buyDate}
               sellDate={sellDate}
