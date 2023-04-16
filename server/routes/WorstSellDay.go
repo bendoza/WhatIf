@@ -100,13 +100,14 @@ func (h DBRouter) WorstSellDay(w http.ResponseWriter, r *http.Request) {
 	// Initializing an index and a bool for the loop to be more easily taken advantage of
 	var index int = 0
 	var first bool = true
+	var previousTupleDate time.Time
 
 	// Initializing dailyPortfolioValue and the map for the total portfolio value of each day where the day
 	// is the key and the value of the portfolio on that day is the value of the key
 	var dailyPortfolioValue float64 = 0
 	dailyValues := make(map[string]float64)
 
-	// Initializing an initial value which will eventually be replaced with a
+	// Initializing an initial value which will eventually be replaced with the total portfolio value from the first day
 	var initialValue float64 = 0
 
 	// Looping through all tuples from within the date range
@@ -124,16 +125,24 @@ func (h DBRouter) WorstSellDay(w http.ResponseWriter, r *http.Request) {
 		// by using the price from the SQL query
 		dailyPortfolioValue += TickerValueMap[ticker] * dailyValue
 
-		// Condition that allows the loop to switch from day to day by checking if the ticker is at the end of the list
-		// Before resetting for the next day, it adds the date and the portfolio value to the new map
-		if ticker == Tickers[len(Tickers)-1] && index != 0 {
+		// Condition that allows the loop to switch from day to day by checking if the date is not equal to the date of the previous
+		// tuple and if the loop is not on the first iteration, because then the previousTupleDate is null and not equal to the non-exist
+		// previous tuple's date
+		if index == 0 {
+			dailyPortfolioValue += TickerValueMap[ticker] * dailyValue
+		}
+		if previousTupleDate != date && index != 0 {
 			if first {
 				initialValue = dailyPortfolioValue
 				first = false
 			}
-			dailyValues[date.Format("01-02-2006")] = dailyPortfolioValue
+			dailyValues[previousTupleDate.Format("01-02-2006")] = dailyPortfolioValue
 			dailyPortfolioValue = 0
+			dailyPortfolioValue += TickerValueMap[ticker] * dailyValue
+		} else if index != 0 {
+			dailyPortfolioValue += TickerValueMap[ticker] * dailyValue
 		}
+		previousTupleDate = date
 		index++
 	}
 
