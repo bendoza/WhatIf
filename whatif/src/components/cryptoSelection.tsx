@@ -1,4 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+interface Crypto {
+  ticker: string;
+}
 
 interface CryptoAmount {
   [key: string]: number;
@@ -6,6 +10,23 @@ interface CryptoAmount {
 
 const CryptoSelection: React.FC = () => {
   const [selectedCryptos, setSelectedCryptos] = useState<CryptoAmount>({});
+  const [cryptoList, setCryptoList] = useState<Crypto[]>([]);
+
+  useEffect(() => {
+    // Load the text file using fetch
+    fetch('/cryptoTickersOnly.txt')
+      .then((response) => response.text())
+      .then((data) => {
+        // Parse the text data into an array of Crypto objects
+        const cryptoData = data.split('\n').map((line) => ({
+          ticker: line.trim(),
+        }));
+        setCryptoList(cryptoData);
+      })
+      .catch((err) => {
+        console.error('Failed to load crypto list:', err);
+      });
+  }, []);
 
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = event.target;
@@ -28,27 +49,27 @@ const CryptoSelection: React.FC = () => {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 h-64 overflow-y-scroll">
       <h2 className="text-lg mb-2">Select Cryptos</h2>
       <div>
-        {['BTC', 'ETH', 'ADA'].map((crypto) => (
-          <div key={crypto} className="flex items-center mb-2">
+        {cryptoList.map((crypto) => (
+          <div key={crypto.ticker} className="flex items-center mb-2">
             <label>
               <input
                 type="checkbox"
-                value={crypto}
+                value={crypto.ticker}
                 onChange={handleCheckboxChange}
                 className="mr-1"
               />
-              {crypto}
+              {crypto.ticker}
             </label>
-            {selectedCryptos.hasOwnProperty(crypto) && (
+            {selectedCryptos.hasOwnProperty(crypto.ticker) && (
               <input
                 type="number"
                 min="0"
                 step="any"
-                value={selectedCryptos[crypto]}
-                onChange={(e) => handleAmountChange(e, crypto)}
+                value={selectedCryptos[crypto.ticker]}
+                onChange={(e) => handleAmountChange(e, crypto.ticker)}
                 className="ml-4 w-20"
               />
             )}
