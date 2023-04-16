@@ -11,8 +11,8 @@ import (
 	"time"
 )
 
-// Code produces correct output.
-// Query is complex and code is clean, just could use more exclusive testing for this functions output to ensure it's 100% finished.
+// Code producing correct output
+// Commented, and SHOULD be FINISHED, query is ACCURATE and COMPLEX
 
 func (h DBRouter) GraphPopulate(w http.ResponseWriter, r *http.Request) {
 

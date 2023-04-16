@@ -11,8 +11,10 @@ import (
 	"time"
 )
 
-// Upon testing, output should be correct.
-// Commented, and needs work with the SQL Query, I would like to unpack some of the Go code to be parts of the SQL query
+// Code producing correct output
+// Commented, and SHOULD be FINISHED, query is ACCURATE and COMPLEX
+
+// I would like to unpack some of the Go code to be parts of the SQL query
 
 func (h DBRouter) WorstSellDay(w http.ResponseWriter, r *http.Request) {
 
