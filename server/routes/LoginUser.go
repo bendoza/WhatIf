@@ -20,7 +20,6 @@ func (h DBRouter) LoginUser(w http.ResponseWriter, r *http.Request) {
 		Message 	string 	`json: "message"`
 	}
 
-	// Creating two new variables to use as reference
 	var requestBody map[string]interface{}
 
 	// Decoding body of the http request for the information for the user account
