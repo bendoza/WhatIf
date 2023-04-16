@@ -13,25 +13,29 @@ const dateselection: React.FC = () => {
   return (
     <div className="p-4">
       <h2 className="text-lg mb-2">Buy & Sell Dates</h2>
-      <div>
-        <label className="mr-2">
-          Buy Date:
-          <input
-            type="date"
-            value={buyDate}
-            onChange={(e) => setBuyDate(e.target.value)}
-            className="ml-1"
-          />
-        </label>
-        <label className="mr-2">
-          Sell Date:
-          <input
-            type="date"
-            value={sellDate}
-            onChange={(e) => setSellDate(e.target.value)}
-            className="ml-1"
-          />
-        </label>
+      <div className="flex flex-col">
+        <div>
+          <label className="mr-2">
+            Buy Date:
+            <input
+              type="date"
+              value={buyDate}
+              onChange={(e) => setBuyDate(e.target.value)}
+              className="ml-1"
+            />
+          </label>
+        </div>
+        <div>
+          <label className="mr-2">
+            Sell Date:
+            <input
+              type="date"
+              value={sellDate}
+              onChange={(e) => setSellDate(e.target.value)}
+              className="ml-1"
+            />
+          </label>
+        </div>
       </div>
       <button
         onClick={handleClick}
