@@ -121,7 +121,6 @@ func (h DBRouter) BetterCoinInvestments(w http.ResponseWriter, r *http.Request) 
 		}
 
 		percentDiffString := fmt.Sprintf("%f", percentDifference)
-		fmt.Println(ticker, percentDifference)
 		placeholder = ticker + ":" + percentDiffString
 
 		OwnedTickers = append(OwnedTickers, placeholder)

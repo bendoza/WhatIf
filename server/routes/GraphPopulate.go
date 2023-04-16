@@ -137,6 +137,7 @@ func (h DBRouter) GraphPopulate(w http.ResponseWriter, r *http.Request) {
 		previousTupleDate = weekStart
 		index++
 	}
+	weeklyValue[previousTupleDate.Format("2006-01-02")] = portfolioValue
 
 	// Initializing a new string slice to enable the key's of the map to be sorted
 	allDates := make([]string, 0, len(weeklyValue))

@@ -121,10 +121,6 @@ func (h DBRouter) WorstSellDay(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 
-		// Using the before mentioned map of the ticker and their amounts to calculate the total value of the portfolio
-		// by using the price from the SQL query
-		dailyPortfolioValue += TickerValueMap[ticker] * dailyValue
-
 		// Condition that allows the loop to switch from day to day by checking if the date is not equal to the date of the previous
 		// tuple and if the loop is not on the first iteration, because then the previousTupleDate is null and not equal to the non-exist
 		// previous tuple's date
@@ -145,6 +141,7 @@ func (h DBRouter) WorstSellDay(w http.ResponseWriter, r *http.Request) {
 		previousTupleDate = date
 		index++
 	}
+	dailyValues[previousTupleDate.Format("01-02-2006")] = dailyPortfolioValue
 
 	// Now checking for the map value that has the absolute least of all potentially daily portfolio values and storing
 	// both the date and value in variables to be returned
