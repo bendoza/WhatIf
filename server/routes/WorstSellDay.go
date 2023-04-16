@@ -11,8 +11,7 @@ import (
 	"time"
 )
 
-// Not exactly sure about the state out the output, I believe the output is correct, but upon testing I could be proven wrong.
-
+// Upon testing, output should be correct.
 // Commented, and needs work with the SQL Query, I would like to unpack some of the Go code to be parts of the SQL query
 
 func (h DBRouter) WorstSellDay(w http.ResponseWriter, r *http.Request) {

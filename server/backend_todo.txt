@@ -1,0 +1,10 @@
+1. Best Day Crypto
+    - DONE, testing
+2. Best Market Day
+    - DONE, testing
+3. Better Coin Investments
+    - Add user owned coin with highest % difference to response strings
+4. Graph Populate
+    - DONE, testing
+5. Worst Sell Day
+    - Potentially find a way to reduce some Golang code by making the SQL query more specific and concise

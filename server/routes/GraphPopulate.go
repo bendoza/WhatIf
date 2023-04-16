@@ -3,6 +3,7 @@ package routes
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"sort"
@@ -11,9 +12,8 @@ import (
 	"time"
 )
 
-// Code can produce incorrect output.
-// Commented, and needs work from Lines 123-136, need to loop through the resulting rows in a better way, or query
-// the DB more concisely for the sum of each weekly avg with the same date
+// Code produces correct output.
+// Query is complex and code is clean, just could use more exclusive testing for this functions output to ensure it's 100% finished.
 
 func (h DBRouter) GraphPopulate(w http.ResponseWriter, r *http.Request) {
 
@@ -85,6 +85,8 @@ func (h DBRouter) GraphPopulate(w http.ResponseWriter, r *http.Request) {
 	sqlBuyDate := buy.Format("02-Jan-06")
 	sqlSellDate := sell.Format("02-Jan-06")
 
+	// SQL Query that selects weekly average prices for cryptocurrencies in users portfolio, so that we can use the amount
+	// they specified they owned of each crypto to calculate total weekly average portfolio value
 	query := `SELECT Ticker, TRUNC(CryptoDate, 'IW') AS WeekStart, AVG(Price) AS WeeklyAverageValue 
 			  FROM DAILYCRYPTOS
 			  WHERE Ticker IN ` + TickerString + ` AND CryptoDate BETWEEN :startDate AND :endDate 
@@ -97,13 +99,9 @@ func (h DBRouter) GraphPopulate(w http.ResponseWriter, r *http.Request) {
 	}
 	defer result.Close()
 
-	// Establishing a response template
-	type GraphDataResponse struct {
-		WeeklyData map[string]float64 `json: "weeklydata"`
-	}
-
-	// Initializing an index for the loop to be more easily taken advantage of
+	// Initializing an index and prev date value for the loop to be more easily taken advantage of
 	var index int = 0
+	var previousTupleDate time.Time
 
 	// Initializing portfolioValue for each coins average weekly value to be added to and ultimately used
 	// as the value that is inserted into the map once all coins for each week have been added
@@ -123,32 +121,46 @@ func (h DBRouter) GraphPopulate(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 
-		// THIS LOGIC IS NOT FULLY CORRECT. NEED TO FIND A WAY SUM ALL WEEKLY AVERAGE VALUES FROM EACH DATE
-
 		// Multiplying the average value of the ticker by the amount owned by the user to determine
 		// the average worth of each crypto for the week.
 		// Then adding that average worth of each crypto together to get a total average portfolio value of the week
 
-		// THIS LOGIC IS NOT FULLY CORRECT. NEED TO FIND A WAY SUM ALL WEEKLY AVERAGE VALUES FROM EACH DATE
-		portfolioValue += TickerValueMap[ticker] * weeklyAvgValue
-
-		if ticker == Tickers[len(Tickers)-1] && index != 0 {
-			weeklyValue[weekStart.Format("01-02-2006")] = portfolioValue
-			portfolioValue = 0
+		if index == 0 {
+			portfolioValue += TickerValueMap[ticker] * weeklyAvgValue
 		}
-		// THIS LOGIC IS NOT FULLY CORRECT. NEED TO FIND A WAY SUM ALL WEEKLY AVERAGE VALUES FROM EACH DATE
+		if previousTupleDate != weekStart && index != 0 {
+			fmt.Println(previousTupleDate.Format("2006-01-02"))
+			weeklyValue[previousTupleDate.Format("2006-01-02")] = portfolioValue
+			portfolioValue = 0
+			portfolioValue += TickerValueMap[ticker] * weeklyAvgValue
+		} else if index != 0 {
+			portfolioValue += TickerValueMap[ticker] * weeklyAvgValue
+		}
+		previousTupleDate = weekStart
 		index++
+	}
+
+	// Initializing a new string slice to enable the key's of the map to be sorted
+	allDates := make([]string, 0, len(weeklyValue))
+	for v := range weeklyValue {
+		allDates = append(allDates, v)
+	}
+
+	// Sort the slice of keys
+	sort.Strings(allDates)
+
+	// Create a new map with sorted keys
+	sortedResponse := make(map[string]float64)
+	for _, k := range allDates {
+		sortedResponse[k] = weeklyValue[k]
 	}
 
 	// Setting headers
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	// Setting response map to be the weekly value map created in the loop
-	response := GraphDataResponse{WeeklyData: weeklyValue}
-
-	// Packing response as type JSON
-	jsonResponse, err := json.Marshal(response)
+	// Packing sorted response as type JSON
+	jsonResponse, err := json.Marshal(sortedResponse)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

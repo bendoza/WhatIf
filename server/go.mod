@@ -9,4 +9,7 @@ require (
 	github.com/sijms/go-ora/v2 v2.6.3
 )
 
-require github.com/felixge/httpsnoop v1.0.1 // indirect
+require (
+	github.com/felixge/httpsnoop v1.0.1 // indirect
+	github.com/wk8/go-ordered-map v1.0.0 // indirect
+)
