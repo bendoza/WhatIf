@@ -1,15 +1,20 @@
-import React, { useState } from 'react';
-import Link from 'next/link';
+import React from 'react';
 
-const dateselection: React.FC = () => {
-  const [buyDate, setBuyDate] = useState('');
-  const [sellDate, setSellDate] = useState('');
+interface DateSelectionProps {
+  buyDate: string;
+  sellDate: string;
+  onBuyDateChange: (date: string) => void;
+  onSellDateChange: (date: string) => void;
+  onCalculate: () => void;
+}
 
-  const handleClick = () => {
-    console.log('Buy Date:', buyDate);
-    console.log('Sell Date:', sellDate);
-  };
-
+const DateSelection: React.FC<DateSelectionProps> = ({
+  buyDate,
+  sellDate,
+  onBuyDateChange,
+  onSellDateChange,
+  onCalculate,
+}) => {
   return (
     <div className="p-4">
       <h2 className="text-lg mb-2">Buy & Sell Dates</h2>
@@ -20,7 +25,7 @@ const dateselection: React.FC = () => {
             <input
               type="date"
               value={buyDate}
-              onChange={(e) => setBuyDate(e.target.value)}
+              onChange={(e) => onBuyDateChange(e.target.value)}
               className="ml-1"
             />
           </label>
@@ -31,14 +36,14 @@ const dateselection: React.FC = () => {
             <input
               type="date"
               value={sellDate}
-              onChange={(e) => setSellDate(e.target.value)}
+              onChange={(e) => onSellDateChange(e.target.value)}
               className="ml-1"
             />
           </label>
         </div>
       </div>
       <button
-        onClick={handleClick}
+        onClick={onCalculate}
         className="bg-blue-600 text-white px-4 py-2 mt-4 rounded"
       >
         Calculate
@@ -47,4 +52,4 @@ const dateselection: React.FC = () => {
   );
 };
 
-export default dateselection;
+export default DateSelection;
