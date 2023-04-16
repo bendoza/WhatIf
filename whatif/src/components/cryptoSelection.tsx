@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 
+interface CryptoSelectionProps {
+  onSelectedCryptoStrings: (selectedCryptoStrings: string[]) => void;
+}
+
 interface Crypto {
   ticker: string;
 }
@@ -8,9 +12,12 @@ interface CryptoAmount {
   [key: string]: number;
 }
 
-const CryptoSelection: React.FC = () => {
+const CryptoSelection: React.FC<CryptoSelectionProps> = ({ onSelectedCryptoStrings }) => {
   const [selectedCryptos, setSelectedCryptos] = useState<CryptoAmount>({});
   const [cryptoList, setCryptoList] = useState<Crypto[]>([]);
+  
+  // to be returned
+  const [selectedCryptoStrings, setSelectedCryptoStrings] = useState<string[]>([]);
 
   useEffect(() => {
     // Load the text file using fetch
@@ -27,6 +34,17 @@ const CryptoSelection: React.FC = () => {
         console.error('Failed to load crypto list:', err);
       });
   }, []);
+
+  useEffect(() => {
+    // Save the selected tickers and their values as strings in an array
+    const selectedCryptoStringsArray = Object.entries(selectedCryptos)
+      .map(([crypto, value]) => `${crypto}-${value}`);
+    
+      if (JSON.stringify(selectedCryptoStringsArray) !== JSON.stringify(selectedCryptoStrings)) {
+        setSelectedCryptoStrings(selectedCryptoStringsArray);
+        onSelectedCryptoStrings(selectedCryptoStringsArray);
+      }
+    }, [selectedCryptos, onSelectedCryptoStrings, selectedCryptoStrings]);
 
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = event.target;
