@@ -3,7 +3,6 @@ package routes
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"sort"
@@ -129,7 +128,6 @@ func (h DBRouter) GraphPopulate(w http.ResponseWriter, r *http.Request) {
 			portfolioValue += TickerValueMap[ticker] * weeklyAvgValue
 		}
 		if previousTupleDate != weekStart && index != 0 {
-			fmt.Println(previousTupleDate.Format("2006-01-02"))
 			weeklyValue[previousTupleDate.Format("2006-01-02")] = portfolioValue
 			portfolioValue = 0
 			portfolioValue += TickerValueMap[ticker] * weeklyAvgValue
