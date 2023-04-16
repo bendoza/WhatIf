@@ -1,18 +1,24 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 import logo from '../pictures/Logo1.png';
 
 const SignUp = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string>('');
+
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (password != confirmPassword) {
+    if (password !== confirmPassword) {
       console.error('Passwords do not match.');
-      return
+      setErrorMessage('Passwords do not match.');
+      setTimeout(() => setErrorMessage(''), 5000);
+      return;
     }
     try {
       const response = await fetch('http://localhost:8008/signup', {
@@ -22,14 +28,24 @@ const SignUp = () => {
         },
         body: JSON.stringify({ "Email": email, 
                                "Password": password }),
-
       });
       const data = await response.json();
       console.log(data.Success);
+  
+      if (data.Success) {
+        router.push('/signin');
+      } else {
+        setErrorMessage('Unable to sign up, try again with a different email.');
+        setTimeout(() => setErrorMessage(''), 5000);
+      }
     } catch (error) {
       console.error('Error:', error);
+      setErrorMessage('An error occurred. Please try again.');
+      setTimeout(() => setErrorMessage(''), 5000);
     }
   };
+  
+
 
   return (
     <div className="bg-black fixed top-0 left-0 h-screen w-screen flex items-center justify-center">
@@ -97,6 +113,11 @@ const SignUp = () => {
           </Link>
         </form>
       </div>
+      {errorMessage && (
+        <div className="absolute bottom-10 left-10 bg-red-500 text-white py-2 px-4 rounded-lg">
+          {errorMessage}
+        </div>
+      )}
     </div>
   );
 };
