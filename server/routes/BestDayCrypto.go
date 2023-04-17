@@ -64,12 +64,12 @@ func (h DBRouter) BestDayCrypto(w http.ResponseWriter, r *http.Request) {
 	var SellDate string = requestBody["SellDate"].(string)
 
 	// Formatting buy and sell date to be embedded into SQL query
-	buy, err := time.Parse("2006-01-02", BuyDate)
+	buy, err := time.Parse("01/02/2006", BuyDate)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	sell, err := time.Parse("2006-01-02", SellDate)
+	sell, err := time.Parse("01/02/2006", SellDate)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -81,8 +81,8 @@ func (h DBRouter) BestDayCrypto(w http.ResponseWriter, r *http.Request) {
 	// of DailyCryptos where the ticker is the same, and the dates are consecutive.
 	// Also filters out all rows except the row with the highest percent difference to be returned
 	query := `SELECT A.Ticker, B.CryptoDate AS FirstDate, ((B.Price - A.Price) / A.Price) * 100 AS PercentIncrease
-			  FROM DAILYCRYPTOS A
-			  JOIN DAILYCRYPTOS B ON A.Ticker = B.Ticker AND A.CryptoDate = B.CryptoDate - 1
+			  FROM "B.MENDOZA"."DAILYCRYPTOS" A
+			  JOIN "B.MENDOZA"."DAILYCRYPTOS" B ON A.Ticker = B.Ticker AND A.CryptoDate = B.CryptoDate - 1
 			  WHERE A.CryptoDate BETWEEN :startDate AND :endDate AND A.Ticker IN ` + TickerString + `
 			  ORDER BY PercentIncrease DESC
 			  FETCH FIRST 1 ROWS ONLY`
