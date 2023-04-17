@@ -18,11 +18,11 @@ const ComparePage: React.FC = () => {
   }, []);
 
   const [bestSingleCrypto, setBestSingleCrypto] = useState({
-    symbol: '',
-    date: '',
-    increase: 0,
+    Ticker: '',
+    Date: '',
+    PercentIncrease: 0,
   });
-  const [bestMarketDay, setBestMarketDay] = useState({ date: '', increase: 0 });
+  const [bestMarketDay, setBestMarketDay] = useState({ Date: '', PercentIncrease: 0 });
   const [worstDayToSell, setWorstDayToSell] = useState({ date: '', decrease: 0 });
   const [topOutperformers, setTopOutperformers] = useState([]);
 
@@ -33,18 +33,112 @@ const ComparePage: React.FC = () => {
 
   const [selectedCryptos, setSelectedCryptos] = useState<string[]>([]);
 
+  var bestDayCryptoData;
+  var bestMarketDayData;
+  var betterCoinInvestmentsData;
+  var graphPopulateData;
+  var worstSellDayData;
+
   const handleSelectedCryptoStrings = (selectedCryptoStrings: string[]) => {
     setSelectedCryptos(selectedCryptoStrings);
   };
 
   const handleCalculateClick = () => {
-    console.log('Buy Date:', buyDate);
-    console.log('Sell Date:', sellDate);
 
-    console.log('Tickers: ', selectedCryptos)
+    fetch('http://localhost:8008/bestDayCrypto', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        TickerValues: selectedCryptos,
+        BuyDate: buyDate,
+        SellDate: sellDate,
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      setBestSingleCrypto(data)
+    })
+    .catch(error => {
+      console.log(error)
+    });
 
-    // Add your calculation logic here
-    // and update the results state variables
+    fetch('http://localhost:8008/bestMarketDay', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        TickerValues: selectedCryptos,
+        BuyDate: buyDate,
+        SellDate: sellDate,
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      setBestMarketDay(data)
+    })
+    .catch(error => {
+      console.log(error)
+    });
+
+    fetch('http://localhost:8008/betterCoinInvestments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        TickerValues: selectedCryptos,
+        BuyDate: buyDate,
+        SellDate: sellDate,
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      setBestMarketDay(data)
+    })
+    .catch(error => {
+      console.log(error)
+    });
+
+    fetch('http://localhost:8008/graphPopulate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        TickerValues: selectedCryptos,
+        BuyDate: buyDate,
+        SellDate: sellDate,
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      setBestMarketDay(data)
+    })
+    .catch(error => {
+      console.log(error)
+    });
+
+    fetch('http://localhost:8008/worseSellDay', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        TickerValues: selectedCryptos,
+        BuyDate: buyDate,
+        SellDate: sellDate,
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      setBestMarketDay(data)
+    })
+    .catch(error => {
+      console.log(error)
+    });
 
     setShowResults(true);
   };
@@ -88,7 +182,7 @@ const ComparePage: React.FC = () => {
           <div className="mt-8">
             <PortfolioValueChart key={JSON.stringify(labels)} labels={labels} data={data} />
             <ResultsComponent
-              bestSingleCrypto={bestSingleCrypto}
+              bestDayCrypto={bestSingleCrypto}
               bestMarketDay={bestMarketDay}
               worstDayToSell={worstDayToSell}
               topOutperformers={topOutperformers}

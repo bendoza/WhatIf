@@ -1,14 +1,14 @@
 import React from 'react';
 
 interface ResultsComponentProps {
-  bestSingleCrypto: { symbol: string; date: string; increase: number };
-  bestMarketDay: { date: string; increase: number };
+  bestDayCrypto: { Ticker: string; Date: string; PercentIncrease: number };
+  bestMarketDay: { Date: string; PercentIncrease: number };
   worstDayToSell: { date: string; decrease: number };
   topOutperformers: { symbol: string; value: number; outperformed: string[] }[];
 }
 
 const ResultsComponent: React.FC<ResultsComponentProps> = ({
-  bestSingleCrypto,
+  bestDayCrypto,
   bestMarketDay,
   worstDayToSell,
   topOutperformers,
@@ -18,22 +18,22 @@ const ResultsComponent: React.FC<ResultsComponentProps> = ({
       <div className="bg-white p-4 rounded-md shadow">
         <h2 className="text-lg mb-2">Best Single Crypto Performance</h2>
         <p>
-          <strong>Symbol:</strong> {bestSingleCrypto.symbol}
+          <strong>Symbol:</strong> {bestDayCrypto.Ticker}
         </p>
         <p>
-          <strong>Date:</strong> {bestSingleCrypto.date}
+          <strong>Date:</strong> {bestDayCrypto.Date}
         </p>
         <p>
-          <strong>Percentage Increase:</strong> {bestSingleCrypto.increase.toFixed(2)}%
+          <strong>Percentage Increase:</strong> {bestDayCrypto.PercentIncrease.toFixed(2)}%
         </p>
       </div>
       <div className="bg-white p-4 rounded-md shadow">
         <h2 className="text-lg mb-2">Best Market Day</h2>
         <p>
-          <strong>Date:</strong> {bestMarketDay.date}
+          <strong>Date:</strong> {bestMarketDay.Date}
         </p>
         <p>
-          <strong>Percentage Increase:</strong> {bestMarketDay.increase.toFixed(2)}%
+          <strong>Percentage Increase:</strong> {bestMarketDay.PercentIncrease.toFixed(2)}%
         </p>
       </div>
       <div className="bg-white p-4 rounded-md shadow">
