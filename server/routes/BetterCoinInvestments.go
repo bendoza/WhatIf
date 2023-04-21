@@ -72,12 +72,12 @@ func (h DBRouter) BetterCoinInvestments(w http.ResponseWriter, r *http.Request) 
 	var SellDate string = requestBody["SellDate"].(string)
 
 	// Formatting buy and sell date to be embedded into SQL query
-	buy, err := time.Parse("01/02/2006", BuyDate)
+	buy, err := time.Parse("2006-01-02", BuyDate)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	sell, err := time.Parse("01/02/2006", SellDate)
+	sell, err := time.Parse("2006-01-02", SellDate)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -142,7 +142,7 @@ func (h DBRouter) BetterCoinInvestments(w http.ResponseWriter, r *http.Request) 
 			  										  AND A.Price <> 0
 		  										  )
 			  ORDER BY PercentDifference DESC
-			  FETCH FIRST 5 ROWS ONLY`
+			  FETCH FIRST 3 ROWS ONLY`
 
 	result, err = h.DB.Query(query, sql.Named("startDate", sqlBuyDate), sql.Named("endDate", sqlSellDate))
 	if err != nil {

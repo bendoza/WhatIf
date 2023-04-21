@@ -1,10 +1,17 @@
 import React from 'react';
 
+interface TopOutperformer {
+  NewTicker: string;
+  NewTickerPctDiff: number;
+  OwnedTicker: string;
+  OwnedTickerPctDiff: number;
+}
+
 interface ResultsComponentProps {
   bestDayCrypto: { Ticker: string; Date: string; PercentIncrease: number };
   bestMarketDay: { Date: string; PercentIncrease: number };
-  worstDayToSell: { date: string; decrease: number };
-  topOutperformers: { symbol: string; value: number; outperformed: string[] }[];
+  worstDayToSell: { Date: string; PercentDifference: number };
+  topOutperformers: TopOutperformer[];
 }
 
 const ResultsComponent: React.FC<ResultsComponentProps> = ({
@@ -16,7 +23,7 @@ const ResultsComponent: React.FC<ResultsComponentProps> = ({
   return (
     <div className="p-4 space-y-6">
       <div className="bg-white p-4 rounded-md shadow">
-        <h2 className="text-lg mb-2">Best Single Crypto Performance</h2>
+        <h2 className="text-lg mb-2">Your Crypto With Best Single Day Performance</h2>
         <p>
           <strong>Symbol:</strong> {bestDayCrypto.Ticker}
         </p>
@@ -24,25 +31,25 @@ const ResultsComponent: React.FC<ResultsComponentProps> = ({
           <strong>Date:</strong> {bestDayCrypto.Date}
         </p>
         <p>
-          <strong>Percentage Increase:</strong> {bestDayCrypto.PercentIncrease.toFixed(2)}%
+          <strong>Day's Percent Increase:</strong> {bestDayCrypto.PercentIncrease.toFixed(2)}%
         </p>
       </div>
       <div className="bg-white p-4 rounded-md shadow">
-        <h2 className="text-lg mb-2">Best Market Day</h2>
+        <h2 className="text-lg mb-2">Best Overall Day Amongst Our Crypto Dataset</h2>
         <p>
           <strong>Date:</strong> {bestMarketDay.Date}
         </p>
         <p>
-          <strong>Percentage Increase:</strong> {bestMarketDay.PercentIncrease.toFixed(2)}%
+          <strong>Day's Total Percent Increase:</strong> {bestMarketDay.PercentIncrease.toFixed(2)}%
         </p>
       </div>
       <div className="bg-white p-4 rounded-md shadow">
         <h2 className="text-lg mb-2">Worst Day to Sell</h2>
         <p>
-          <strong>Date:</strong> {worstDayToSell.date}
+          <strong>Date:</strong> {worstDayToSell.Date}
         </p>
         <p>
-          <strong>Percentage Decrease:</strong> {worstDayToSell.decrease.toFixed(2)}%
+          <strong>Percent Change On This Date From Buy Date:</strong> {worstDayToSell.PercentDifference.toFixed(2)}%
         </p>
       </div>
       <div className="bg-white p-4 rounded-md shadow">
@@ -50,17 +57,19 @@ const ResultsComponent: React.FC<ResultsComponentProps> = ({
         <table className="w-full table-fixed">
           <thead>
             <tr className="border-b">
-              <th className="w-1/4 px-4 py-2">Symbol</th>
-              <th className="w-1/4 px-4 py-2">Value</th>
-              <th className="w-1/2 px-4 py-2">Outperformed</th>
+              <th className="w-1/4 px-4 py-2">New Symbol</th>
+              <th className="w-1/4 px-4 py-2">Percent Difference from Buy Date</th>
+              <th className="w-1/4 px-4 py-2">Owned Symbol</th>
+              <th className="w-1/4 px-4 py-2">Percent Difference from Buy Date</th>
             </tr>
           </thead>
           <tbody>
             {topOutperformers.map((outperformer, index) => (
               <tr key={index} className="border-b">
-                <td className="px-4 py-2">{outperformer.symbol}</td>
-                <td className="px-4 py-2">${outperformer.value.toFixed(2)}</td>
-                <td className="px-4 py-2">{outperformer.outperformed.join(', ')}</td>
+                <td className="px-14 py-2">{outperformer.NewTicker}</td>
+                <td className="px-14 py-2">{outperformer.NewTickerPctDiff.toFixed(2)}%</td>
+                <td className="px-14 py-2">{outperformer.OwnedTicker}</td>
+                <td className="px-14 py-2">{outperformer.OwnedTickerPctDiff.toFixed(2)}%</td>
               </tr>
             ))}
           </tbody>

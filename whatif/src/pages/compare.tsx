@@ -5,6 +5,7 @@ import DateSelection from '../components/dateselection';
 import withAuth from '../components/withAuth';
 import PortfolioValueChart from '../components/PortfolioValueChart';
 import ResultsComponent from '../components/ResultsComponent';
+import { it } from 'node:test';
 
 const ComparePage: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -22,9 +23,31 @@ const ComparePage: React.FC = () => {
     Date: '',
     PercentIncrease: 0,
   });
-  const [bestMarketDay, setBestMarketDay] = useState({ Date: '', PercentIncrease: 0 });
-  const [worstDayToSell, setWorstDayToSell] = useState({ date: '', decrease: 0 });
-  const [topOutperformers, setTopOutperformers] = useState([]);
+  const [bestMarketDay, setBestMarketDay] = useState({ 
+    Date: '', 
+    PercentIncrease: 0 
+  });
+  const [worstDayToSell, setWorstDayToSell] = useState({ 
+    Date: '', 
+    PercentDifference: 0 
+  });
+  const [outPerformingStringArray, setOutPerformingStringArray] = useState<string[]>([]);
+
+  interface TopOutperformer {
+    NewTicker: string;
+    NewTickerPctDiff: number;
+    OwnedTicker: string;
+    OwnedTickerPctDiff: number;
+  }
+
+  let updatedTopOutperformers: TopOutperformer[] = [];
+  let orderedKeys: string[] = [];
+  let orderedValues: number[] = [];
+
+  const [labels, setLabels] = useState<string[]>([]);
+  const [data, setData] = useState<number[]>([]);
+
+  const [topOutperformers, setTopOutperformers] = useState<TopOutperformer[]>([]);
 
   const [showResults, setShowResults] = useState(false);
 
@@ -96,7 +119,19 @@ const ComparePage: React.FC = () => {
     })
     .then(response => response.json())
     .then(data => {
-      setBestMarketDay(data)
+      setOutPerformingStringArray(data)
+      for (let i = 0; i < outPerformingStringArray.length; i++) {
+        var split = outPerformingStringArray[i].split("-", 2);
+        var newTicker = split[0].split(":", 2);
+        var ownedTicker = split[1].split(":", 2);
+        updatedTopOutperformers.push({
+          NewTicker: newTicker[0],
+          NewTickerPctDiff: +newTicker[1],
+          OwnedTicker: ownedTicker[0],
+          OwnedTickerPctDiff: +ownedTicker[1]
+        });
+        setTopOutperformers(updatedTopOutperformers);
+      }
     })
     .catch(error => {
       console.log(error)
@@ -114,14 +149,19 @@ const ComparePage: React.FC = () => {
       })
     })
     .then(response => response.json())
-    .then(data => {
-      setBestMarketDay(data)
+    .then(result => {
+      Object.keys(result).sort().forEach((key) => {
+        orderedKeys.push(key);
+        orderedValues.push(result[key]);
+      });
+      setLabels(orderedKeys);
+      setData(orderedValues);
     })
     .catch(error => {
       console.log(error)
     });
 
-    fetch('http://localhost:8008/worseSellDay', {
+    fetch('http://localhost:8008/worstSellDay', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -134,7 +174,7 @@ const ComparePage: React.FC = () => {
     })
     .then(response => response.json())
     .then(data => {
-      setBestMarketDay(data)
+      setWorstDayToSell(data)
     })
     .catch(error => {
       console.log(error)
@@ -142,9 +182,6 @@ const ComparePage: React.FC = () => {
 
     setShowResults(true);
   };
-
-  const [labels, setLabels] = useState(['2023-01-01', '2023-01-02', '2023-01-03', '2023-01-04']);
-  const [data, setData] = useState([12000, 15000, 18000, 21000]);
 
   return (
     
@@ -176,7 +213,7 @@ const ComparePage: React.FC = () => {
       {showResults && (
         <div className="container mx-auto my-8">
           <div className="w-full text-center mb-6">
-            <h1 className="text-4xl font-semibold">Results</h1>
+            <h1 className="text-4xl font-semibold">Your Search Results</h1>
           </div>
 
           <div className="mt-8">
