@@ -66,32 +66,34 @@ const CryptoSelection: React.FC<CryptoSelectionProps> = ({ onSelectedCryptoStrin
   };
 
   return (
-    <div className="p-4 h-64 overflow-y-scroll">
-      <h2 className="text-lg mb-2">Select Your Theoretical Portfolio (with values)</h2>
-      <div>
-        {cryptoList.map((crypto) => (
-          <div key={crypto.ticker} className="flex items-center mb-2">
-            <label>
-              <input
-                type="checkbox"
-                value={crypto.ticker}
-                onChange={handleCheckboxChange}
-                className="mr-1"
-              />
-              {crypto.ticker}
-            </label>
-            {selectedCryptos.hasOwnProperty(crypto.ticker) && (
-              <input
-                type="number"
-                min="0"
-                step="any"
-                value={selectedCryptos[crypto.ticker]}
-                onChange={(e) => handleAmountChange(e, crypto.ticker)}
-                className="ml-4 w-20"
-              />
-            )}
-          </div>
-        ))}
+    <div>
+      <h2 className="text-lg text-center mb-2">Select Your Theoretical Portfolio (with values)</h2>
+      <div className="p-4 h-64 overflow-y-scroll">
+        <div>
+          {cryptoList.map((crypto) => (
+            <div key={crypto.ticker} className="flex items-center mb-2">
+              <label>
+                <input
+                  type="checkbox"
+                  value={crypto.ticker}
+                  onChange={handleCheckboxChange}
+                  className="mr-1"
+                />
+                {crypto.ticker}
+              </label>
+              {selectedCryptos.hasOwnProperty(crypto.ticker) && (
+                <input
+                  type="number"
+                  min="0"
+                  step="any"
+                  value={selectedCryptos[crypto.ticker]}
+                  onChange={(e) => handleAmountChange(e, crypto.ticker)}
+                  className="ml-4 w-20"
+                />
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

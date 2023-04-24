@@ -17,8 +17,10 @@ const DateSelection: React.FC<DateSelectionProps> = ({
 }) => {
   return (
     <div className="p-4">
-      <h2 className="text-lg mb-2">Buy & Sell Dates</h2>
-      <div className="flex flex-col">
+      <h2 className="text-lg text-center">Buy & Sell Dates</h2>
+      <h2 className="text-sm text-center">Available Dates: 09/07/2014 - 02/14/2022</h2>
+      <h2 className="text-xs text-center text-red-700 mb-2">Keep in mind: Not all cryptocurrencies have data that spans the entire date range.</h2>
+      <div className="flex flex-col text-center">
         <div>
           <label className="mr-2">
             Buy Date:
@@ -41,13 +43,13 @@ const DateSelection: React.FC<DateSelectionProps> = ({
             />
           </label>
         </div>
-      </div>
-      <button
+        <button
         onClick={onCalculate}
-        className="bg-blue-600 text-white px-4 py-2 mt-4 rounded"
+        className="bg-blue-600 text-white py-2 mt-4 rounded"
       >
         Calculate
       </button>
+      </div>
     </div>
   );
 };
