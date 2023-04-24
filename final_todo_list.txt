@@ -1,6 +1,6 @@
 TODO:
 
-1. Figure out why Top 3 Outperformers only works after second calculate click.
+1. Figure out why Top 3 Outperformers only works after second calculate click. [COMPLETED]
 
 2. Print to the UI the date range that the user can use, as well as a reminder that not all cryptos have data within the entire date range.
 

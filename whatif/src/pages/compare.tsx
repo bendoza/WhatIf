@@ -18,6 +18,13 @@ const ComparePage: React.FC = () => {
     }
   }, []);
 
+  interface TopOutperformer {
+    NewTicker: string;
+    NewTickerPctDiff: number;
+    OwnedTicker: string;
+    OwnedTickerPctDiff: number;
+  }
+
   const [bestSingleCrypto, setBestSingleCrypto] = useState({
     Ticker: '',
     Date: '',
@@ -31,17 +38,10 @@ const ComparePage: React.FC = () => {
     Date: '', 
     PercentDifference: 0 
   });
-  const [outPerformingStringArray, setOutPerformingStringArray] = useState<string[]>([]);
   const [totalTuples, setTotalTuples] = useState({ 
     Value: 0 
   });
-
-  interface TopOutperformer {
-    NewTicker: string;
-    NewTickerPctDiff: number;
-    OwnedTicker: string;
-    OwnedTickerPctDiff: number;
-  }
+  const [topOutperformers, setTopOutperformers] = useState<TopOutperformer[]>([]);
 
   let updatedTopOutperformers: TopOutperformer[] = [];
   let orderedKeys: string[] = [];
@@ -49,8 +49,6 @@ const ComparePage: React.FC = () => {
 
   const [labels, setLabels] = useState<string[]>([]);
   const [data, setData] = useState<number[]>([]);
-
-  const [topOutperformers, setTopOutperformers] = useState<TopOutperformer[]>([]);
 
   const [showResults, setShowResults] = useState(false);
 
@@ -116,9 +114,8 @@ const ComparePage: React.FC = () => {
     })
     .then(response => response.json())
     .then(data => {
-      setOutPerformingStringArray(data)
-      for (let i = 0; i < outPerformingStringArray.length; i++) {
-        var split = outPerformingStringArray[i].split("-", 2);
+      for (let i = 0; i < data.length; i++) {
+        var split = data[i].split("-", 2);
         var newTicker = split[0].split(":", 2);
         var ownedTicker = split[1].split(":", 2);
         updatedTopOutperformers.push({
@@ -127,8 +124,8 @@ const ComparePage: React.FC = () => {
           OwnedTicker: ownedTicker[0],
           OwnedTickerPctDiff: +ownedTicker[1]
         });
-        setTopOutperformers(updatedTopOutperformers);
       }
+      setTopOutperformers(updatedTopOutperformers);
     })
     .catch(error => {
       console.log(error)
