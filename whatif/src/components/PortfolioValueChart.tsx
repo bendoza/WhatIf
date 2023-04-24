@@ -30,7 +30,7 @@ const PortfolioValueChart: React.FC<PortfolioValueChartProps> = ({
           labels: labels,
           datasets: [
             {
-              label: 'Portfolio Value',
+              label: 'Average Weekly Portfolio Value',
               data: data,
               borderColor: 'rgba(255, 99, 132, 1)', // Change this to the desired color
               backgroundColor: 'rgba(255, 99, 132, 0.2)', // Add this to set the fill color under the line

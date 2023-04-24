@@ -61,12 +61,12 @@ func (h DBRouter) BestMarketDay(w http.ResponseWriter, r *http.Request) {
 	var SellDate string = requestBody["SellDate"].(string)
 
 	// Formatting buy and sell date to be embedded into SQL query
-	buy, err := time.Parse("01/02/2006", BuyDate)
+	buy, err := time.Parse("2006-01-02", BuyDate)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	sell, err := time.Parse("01/02/2006", SellDate)
+	sell, err := time.Parse("2006-01-02", SellDate)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -79,8 +79,8 @@ func (h DBRouter) BestMarketDay(w http.ResponseWriter, r *http.Request) {
 	// Also filters out all rows except the row with the highest percent difference to be returned
 	// So the only row returned has the date with the highest daily percent increase and said percent increase
 	query := `SELECT B.CryptoDate, (AVG(B.Price) - AVG(A.Price)) / AVG(A.Price) AS TotalPriceIncrease
-  			  FROM DAILYCRYPTOS A
-  			  JOIN DAILYCRYPTOS B ON B.CryptoDate = A.CryptoDate + 1
+  			  FROM "B.MENDOZA"."DAILYCRYPTOS" A
+  			  JOIN "B.MENDOZA"."DAILYCRYPTOS" B ON B.CryptoDate = A.CryptoDate + 1
   			  WHERE B.CryptoDate BETWEEN :startDate AND :endDate 
   			  GROUP BY B.CryptoDate
   			  ORDER BY TotalPriceIncrease DESC

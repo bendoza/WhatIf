@@ -71,12 +71,12 @@ func (h DBRouter) GraphPopulate(w http.ResponseWriter, r *http.Request) {
 	var SellDate string = requestBody["SellDate"].(string)
 
 	// Formatting buy and sell date to be embedded into SQL query
-	buy, err := time.Parse("01/02/2006", BuyDate)
+	buy, err := time.Parse("2006-01-02", BuyDate)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	sell, err := time.Parse("01/02/2006", SellDate)
+	sell, err := time.Parse("2006-01-02", SellDate)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -87,7 +87,7 @@ func (h DBRouter) GraphPopulate(w http.ResponseWriter, r *http.Request) {
 	// SQL Query that selects weekly average prices for cryptocurrencies in users portfolio, so that we can use the amount
 	// they specified they owned of each crypto to calculate total weekly average portfolio value
 	query := `SELECT Ticker, TRUNC(CryptoDate, 'IW') AS WeekStart, AVG(Price) AS WeeklyAverageValue 
-			  FROM DAILYCRYPTOS
+			  FROM "B.MENDOZA"."DAILYCRYPTOS"
 			  WHERE Ticker IN ` + TickerString + ` AND CryptoDate BETWEEN :startDate AND :endDate 
 		  	  GROUP BY Ticker, TRUNC(CryptoDate, 'IW')
 			  ORDER BY TRUNC(CryptoDate, 'IW'), Ticker ASC`

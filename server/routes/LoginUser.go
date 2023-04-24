@@ -1,23 +1,23 @@
 package routes
 
 import (
-	"encoding/json"
-	"net/http"
-	"log"
 	"database/sql"
+	"encoding/json"
+	"log"
+	"net/http"
 )
 
 func (h DBRouter) LoginUser(w http.ResponseWriter, r *http.Request) {
-	
+
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
 	type LoginAttempt struct {
-		LoggedIn 	bool   	`json: "success"`
-		Email		string	`json: "email"`
-		Message 	string 	`json: "message"`
+		LoggedIn bool   `json: "success"`
+		Email    string `json: "email"`
+		Message  string `json: "message"`
 	}
 
 	var requestBody map[string]interface{}
@@ -30,12 +30,12 @@ func (h DBRouter) LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Added a line to check the database for any users with the same email as the new account
-	result, err := h.DB.Query("SELECT * FROM \"B.MENDOZA\".\"REGISTEREDUSERS\" WHERE email = :email", sql.Named("email", requestBody["Email"].(string)))
+	result, err := h.DB.Query(`SELECT * FROM "B.MENDOZA"."REGISTEREDUSERS" WHERE email = :email`, sql.Named("email", requestBody["Email"].(string)))
 
 	// Checking if the rows that have the email is 0 therefore nobody has the email
 	if result.Next() == true {
 
-		result, err := h.DB.Query("SELECT password FROM \"B.MENDOZA\".\"REGISTEREDUSERS\" WHERE email = :email", sql.Named("email", requestBody["Email"].(string)))
+		result, err := h.DB.Query(`SELECT password FROM "B.MENDOZA"."REGISTEREDUSERS" WHERE email = :email`, sql.Named("email", requestBody["Email"].(string)))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -43,16 +43,16 @@ func (h DBRouter) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 		if result.Next() == true {
 			var column2Value string
-    		err = result.Scan(&column2Value)
-    		if err != nil {
-    		    log.Fatal(err)
-    		}
-    		if column2Value == requestBody["Password"].(string) {
-    		    
+			err = result.Scan(&column2Value)
+			if err != nil {
+				log.Fatal(err)
+			}
+			if column2Value == requestBody["Password"].(string) {
+
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusOK)
 
-				response := LoginAttempt{ LoggedIn: true, Email: requestBody["Email"].(string), Message: "User succesfully logged in" }
+				response := LoginAttempt{LoggedIn: true, Email: requestBody["Email"].(string), Message: "User succesfully logged in"}
 				// Packing response as type JSON
 				jsonResponse, err1 := json.Marshal(response)
 				if err1 != nil {
@@ -62,11 +62,11 @@ func (h DBRouter) LoginUser(w http.ResponseWriter, r *http.Request) {
 				// Write JSON response
 				w.Write(jsonResponse)
 
-    		} else {
+			} else {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusOK)
 
-				response := LoginAttempt{ LoggedIn: false, Email: requestBody["Email"].(string), Message: "Email and password combo do not exist."}
+				response := LoginAttempt{LoggedIn: false, Email: requestBody["Email"].(string), Message: "Email and password combo do not exist."}
 				// Packing response as type JSON
 				jsonResponse, err1 := json.Marshal(response)
 				if err1 != nil {
@@ -81,7 +81,7 @@ func (h DBRouter) LoginUser(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 
-		response := LoginAttempt{ LoggedIn: false, Email: requestBody["Email"].(string), Message: "Email does not exist in our database."}
+		response := LoginAttempt{LoggedIn: false, Email: requestBody["Email"].(string), Message: "Email does not exist in our database."}
 		// Packing response as type JSON
 		jsonResponse, err1 := json.Marshal(response)
 		if err1 != nil {
