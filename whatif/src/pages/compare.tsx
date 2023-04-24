@@ -115,7 +115,7 @@ const ComparePage: React.FC = () => {
     .then(response => response.json())
     .then(data => {
       for (let i = 0; i < data.length; i++) {
-        var split = data[i].split("-", 2);
+        var split = data[i].split("|", 2);
         var newTicker = split[0].split(":", 2);
         var ownedTicker = split[1].split(":", 2);
         updatedTopOutperformers.push({

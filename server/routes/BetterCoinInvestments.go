@@ -188,7 +188,7 @@ func (h DBRouter) BetterCoinInvestments(w http.ResponseWriter, r *http.Request) 
 		}
 		if tick == len(OwnedTickers)-1 {
 			for i := 0; i < len(NewTickers); i++ {
-				NewTickers[i] = NewTickers[i] + "-" + previousTickerValue
+				NewTickers[i] = NewTickers[i] + "|" + previousTickerValue
 			}
 		}
 	}

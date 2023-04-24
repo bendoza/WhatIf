@@ -67,7 +67,7 @@ const CryptoSelection: React.FC<CryptoSelectionProps> = ({ onSelectedCryptoStrin
 
   return (
     <div className="p-4 h-64 overflow-y-scroll">
-      <h2 className="text-lg mb-2">Select Cryptos</h2>
+      <h2 className="text-lg mb-2">Select Your Theoretical Portfolio (with values)</h2>
       <div>
         {cryptoList.map((crypto) => (
           <div key={crypto.ticker} className="flex items-center mb-2">

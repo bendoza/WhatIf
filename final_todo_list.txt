@@ -6,10 +6,12 @@ TODO:
 
 3. Set date selector to reject any date selection that is outside of Sept. 17th 2014 - Feb 2022ish date range.
 
-4. Print to the UI something like "Select your Portfolio" above the crypto selector
+4. Print to the UI something like "Select your Portfolio" above the crypto selector [COMPLETED]
 
 5. Set Crypto selector to reject any portfolio selection that is completely empty (all values are still 0).
 
 6. Change WorstSellDay's embedded SQL query to be more complex and allow us to delete some Go code that follows it.
 
-7. Update README to consider .env file that contains UFL CISE Oracle Database information, and to consider the Gatorlink VPN connection for the DB.
+7. Update README to consider .env file that contains UFL CISE Oracle Database information, and to consider the Gatorlink VPN connection for the DB. [COMPLETED]
+
+8. Update Follow page to have appropriate photos, links, and bios for each contributor.

@@ -53,6 +53,8 @@ The front end will serve on http://localhost:3000.
 
 ## Initalizing back-end server
 
+First, ensure you have a .env file with the appropriate UFL CISE Oracle Database information and ensure you are connected to the Gatorlink VPN service so you can connect to the database.
+
 Navigate to the `server` folder
 ```zsh
 cd server
