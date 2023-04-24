@@ -2,16 +2,18 @@ TODO:
 
 1. Figure out why Top 3 Outperformers only works after second calculate click. [COMPLETED]
 
-2. Print to the UI the date range that the user can use, as well as a reminder that not all cryptos have data within the entire date range.
+2. Print to the UI the date range that the user can use, as well as a reminder that not all cryptos have data within the entire date range. [TODO]
 
-3. Set date selector to reject any date selection that is outside of Sept. 17th 2014 - Feb 2022ish date range.
+3. Set date selector to reject any date selection that is outside of Sept. 17th 2014 - Feb 2022ish date range. [TODO]
 
 4. Print to the UI something like "Select your Portfolio" above the crypto selector [COMPLETED]
 
-5. Set Crypto selector to reject any portfolio selection that is completely empty (all values are still 0).
+5. Set Crypto selector to reject any portfolio selection that is completely empty (all values are still 0). [TODO]
 
-6. Change WorstSellDay's embedded SQL query to be more complex and allow us to delete some Go code that follows it.
+6. Change WorstSellDay's embedded SQL query to be more complex and allow us to delete some Go code that follows it. [TODO]
 
 7. Update README to consider .env file that contains UFL CISE Oracle Database information, and to consider the Gatorlink VPN connection for the DB. [COMPLETED]
 
-8. Update Follow page to have appropriate photos, links, and bios for each contributor.
+8. Update Follow page to have appropriate photos, links, and bios for each contributor. [TODO]
+
+9. Figure out state of Features page.. delete? [TODO]
