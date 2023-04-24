@@ -192,21 +192,17 @@ const ComparePage: React.FC = () => {
   };
 
   return (
-    
-    <div>
-      
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-indigo-100">
       <Header isLoggedIn={isLoggedIn} />
-      
-
-        <div className="w-full text-center mb-0 bg-gradient-to-r from-gray-500 to-indigo-500 py-6">
-          <h1 className="text-4xl font-semibold text-white">Crypto Performance Comparison</h1>
+      <div className="container mx-auto">
+        <div className="w-full text-center my-8">
+          <h1 className="text-4xl font-semibold text-gray-800">Crypto Performance Comparison</h1>
         </div>
 
-        <div className="bg-gray-200 py-8">
-        <div className="container mx-auto">
-          <div className="grid grid-cols-2 gap-4 p-4 bg-white rounded shadow-md">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <CryptoSelection
-            onSelectedCryptoStrings={handleSelectedCryptoStrings}
+              onSelectedCryptoStrings={handleSelectedCryptoStrings}
             />
             <DateSelection
               buyDate={buyDate}
@@ -220,8 +216,8 @@ const ComparePage: React.FC = () => {
       </div>
       {showResults && (
         <div className="container mx-auto my-8">
-          <div className="w-full text-center mb-6">
-            <h1 className="text-4xl font-semibold">Your Search Results</h1>
+          <div className="w-full text-center mb-8">
+            <h1 className="text-4xl font-semibold text-gray-800">Your Search Results</h1>
           </div>
 
           <div className="mt-8">

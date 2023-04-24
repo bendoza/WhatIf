@@ -16,36 +16,46 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="mx-auto">
       <Head>
         <title>WHAT IF</title>
         <link rel="icon" href="/favicon.ico" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+          rel="stylesheet"
+        />
       </Head>
       <Header isLoggedIn={isLoggedIn} />
 
-      <div className="flex justify-between items-center bg-blue-400 border-y border-black py-40">
-        <div className="px-10 space-y-2">
-          <h1 className="text-6xl max-w-xl font-serif">Welcome to WhatIF</h1>
-          <h2 className="text-xl">How much money would you have made?</h2>
+      <div
+        className="text-center py-80"
+        style={{
+          backgroundImage: "url('pictures/regret.jpg')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
+        <div className="bg-black bg-opacity-70 p-12 rounded-lg max-w-3xl mx-auto shadow-2xl">
+          <h1 className="text-7xl font-serif text-white mb-4">Welcome to WhatIF</h1>
+          <h2 className="text-2xl text-gray-200 mb-12 font-semibold">
+            How much money would you have made?
+          </h2>
 
-          <div className="max-w-xs py-10">
-            {isLoggedIn ? (
-              <Link href="/compare">
-                <h1 className="text-3xl text-white bg-green-600 px-4 py-3 rounded text-center">
-                  Compare Now!
-                </h1>
-              </Link>
-            ) : (
-              <Link href="/signup">
-                <h1 className="text-3xl text-white bg-green-600 px-4 py-3 rounded text-center">
-                  Get started
-                </h1>
-              </Link>
-            )}
-          </div>
+          {isLoggedIn ? (
+            <Link href="/compare">
+              <span className="text-2xl text-white bg-green-600 px-10 py-4 rounded-lg shadow-lg font-semibold hover:bg-green-700 transition-colors duration-200">
+                Compare Now!
+              </span>
+            </Link>
+          ) : (
+            <Link href="/signup">
+              <span className="text-2xl text-white bg-green-600 px-10 py-4 rounded-lg shadow-lg font-semibold hover:bg-green-700 transition-colors duration-200">
+                Get started
+              </span>
+            </Link>
+          )}
         </div>
-
-        <div></div>
       </div>
       <Footer isLoggedIn={isLoggedIn} />
     </div>
