@@ -12,6 +12,7 @@ interface ResultsComponentProps {
   bestMarketDay: { Date: string; PercentIncrease: number };
   worstDayToSell: { Date: string; PercentDifference: number };
   topOutperformers: TopOutperformer[];
+  totalTuples: { Value: number };
 }
 
 const ResultsComponent: React.FC<ResultsComponentProps> = ({
@@ -19,6 +20,7 @@ const ResultsComponent: React.FC<ResultsComponentProps> = ({
   bestMarketDay,
   worstDayToSell,
   topOutperformers,
+  totalTuples
 }) => {
   return (
     <div className="p-4 space-y-6">
@@ -74,6 +76,12 @@ const ResultsComponent: React.FC<ResultsComponentProps> = ({
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="bg-white p-4 rounded-md shadow">
+        <h2 className="text-lg mb-2">Total Tuples</h2>
+        <p>
+          <strong>Our Database contains </strong> {totalTuples.Value} <strong> tuples.</strong>
+        </p>
       </div>
     </div>
   );

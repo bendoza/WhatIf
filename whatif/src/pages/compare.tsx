@@ -32,6 +32,9 @@ const ComparePage: React.FC = () => {
     PercentDifference: 0 
   });
   const [outPerformingStringArray, setOutPerformingStringArray] = useState<string[]>([]);
+  const [totalTuples, setTotalTuples] = useState({ 
+    Value: 0 
+  });
 
   interface TopOutperformer {
     NewTicker: string;
@@ -55,12 +58,6 @@ const ComparePage: React.FC = () => {
   const [sellDate, setSellDate] = useState('');
 
   const [selectedCryptos, setSelectedCryptos] = useState<string[]>([]);
-
-  var bestDayCryptoData;
-  var bestMarketDayData;
-  var betterCoinInvestmentsData;
-  var graphPopulateData;
-  var worstSellDayData;
 
   const handleSelectedCryptoStrings = (selectedCryptoStrings: string[]) => {
     setSelectedCryptos(selectedCryptoStrings);
@@ -161,6 +158,20 @@ const ComparePage: React.FC = () => {
       console.log(error)
     });
 
+    fetch('http://localhost:8008/totalTuples', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      setTotalTuples(data)
+    })
+    .catch(error => {
+      console.log(error)
+    });
+
     fetch('http://localhost:8008/worstSellDay', {
       method: 'POST',
       headers: {
@@ -223,6 +234,7 @@ const ComparePage: React.FC = () => {
               bestMarketDay={bestMarketDay}
               worstDayToSell={worstDayToSell}
               topOutperformers={topOutperformers}
+              totalTuples={totalTuples}
             />
           </div>
         </div>

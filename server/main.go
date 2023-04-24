@@ -35,6 +35,8 @@ func main() {
 
 	r.HandleFunc("/graphPopulate", h.GraphPopulate).Methods("POST")
 
+	r.HandleFunc("/totalTuples", h.TotalTuples).Methods("GET")
+
 	r.HandleFunc("/worstSellDay", h.WorstSellDay).Methods("POST")
 
 	// User account routes
