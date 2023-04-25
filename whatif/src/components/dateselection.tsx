@@ -30,7 +30,7 @@ const DateSelection: React.FC<DateSelectionProps> = ({
           </label>
           <input
             type="date"
-            value={buyDate|| "2017"}
+            value={buyDate}
             min={minDate}
             max={maxDate}
             onChange={(e) => onBuyDateChange(e.target.value)}
