@@ -77,30 +77,25 @@ func (h DBRouter) BestDayCrypto(w http.ResponseWriter, r *http.Request) {
 	sqlBuyDate := buy.Format("02-Jan-06")
 	sqlSellDate := sell.Format("02-Jan-06")
 
-	// SQL Query that selects the Ticker, the Date, and the % difference in price from all rows of the self join
-	// of DailyCryptos where the ticker is the same, and the dates are consecutive.
-	// Also filters out all rows except the row with the highest percent difference to be returned
-	query := `SELECT A.Ticker, B.CryptoDate AS FirstDate, ((B.Price - A.Price) / A.Price) * 100 AS PercentIncrease
-			  FROM "B.MENDOZA"."DAILYCRYPTOS" A
-			  JOIN "B.MENDOZA"."DAILYCRYPTOS" B ON A.Ticker = B.Ticker AND A.CryptoDate = B.CryptoDate - 1
-			  WHERE A.CryptoDate BETWEEN :startDate AND :endDate AND A.Ticker IN ` + TickerString + `
-			  ORDER BY PercentIncrease DESC
+	query := `SELECT MIN(CryptoDate)
+			  FROM "B.MENDOZA"."DAILYCRYPTOS"
+			  WHERE Ticker IN ` + TickerString + `
+			  GROUP BY CryptoDate
+			  ORDER BY CryptoDate ASC
 			  FETCH FIRST 1 ROWS ONLY`
 
-	result, err := h.DB.Query(query, sql.Named("startDate", sqlBuyDate), sql.Named("endDate", sqlSellDate))
+	result, err := h.DB.Query(query)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer result.Close()
 
 	// Initializing variables to store information from table row scan
-	var ticker string
-	var date time.Time
-	var percentIncrease float64
+	var firstDate time.Time
 
 	// Scanning the one row that is turned by the SQL Query
 	if result.Next() {
-		err = result.Scan(&ticker, &date, &percentIncrease)
+		err = result.Scan(&firstDate)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -109,27 +104,86 @@ func (h DBRouter) BestDayCrypto(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Establishing a response template
-	type BestDayResponse struct {
-		Ticker          string  `json: "ticker"`
-		Date            string  `json: "date"`
-		PercentIncrease float64 `json: "percentincrease"`
+	if firstDate.After(sell) {
+
+		type BestDayResponse struct {
+			Ticker          string  `json: "ticker"`
+			Date            string  `json: "date"`
+			PercentIncrease float64 `json: "percentincrease"`
+		}
+
+		// Setting headers
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		// Setting response map to be the weekly value map created in the loop
+		response := BestDayResponse{Ticker: "Selected Cryptos contain no data within the date range selected.", Date: "N/A", PercentIncrease: 0}
+
+		// Packing response as type JSON
+		jsonResponse, err := json.Marshal(response)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		// Write JSON response
+		w.Write(jsonResponse)
+
+	} else {
+
+		// SQL Query that selects the Ticker, the Date, and the % difference in price from all rows of the self join
+		// of DailyCryptos where the ticker is the same, and the dates are consecutive.
+		// Also filters out all rows except the row with the highest percent difference to be returned
+		query2 := `SELECT A.Ticker, B.CryptoDate AS FirstDate, ((B.Price - A.Price) / A.Price) * 100 AS PercentIncrease
+				   FROM "B.MENDOZA"."DAILYCRYPTOS" A
+				   JOIN "B.MENDOZA"."DAILYCRYPTOS" B ON A.Ticker = B.Ticker AND A.CryptoDate = B.CryptoDate - 1
+				   WHERE A.CryptoDate BETWEEN :startDate AND :endDate AND A.Ticker IN ` + TickerString + `
+				   ORDER BY PercentIncrease DESC
+				   FETCH FIRST 1 ROWS ONLY`
+
+		result2, err := h.DB.Query(query2, sql.Named("startDate", sqlBuyDate), sql.Named("endDate", sqlSellDate))
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer result2.Close()
+
+		// Initializing variables to store information from table row scan
+		var ticker string
+		var date time.Time
+		var percentIncrease float64
+
+		// Scanning the one row that is turned by the SQL Query
+		if result2.Next() {
+			err = result2.Scan(&ticker, &date, &percentIncrease)
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			http.Error(w, "No results found", http.StatusNotFound)
+			return
+		}
+
+		// Establishing a response template
+		type BestDayResponse struct {
+			Ticker          string  `json: "ticker"`
+			Date            string  `json: "date"`
+			PercentIncrease float64 `json: "percentincrease"`
+		}
+
+		// Setting headers
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		// Setting response map to be the weekly value map created in the loop
+		response := BestDayResponse{Ticker: ticker, Date: date.Format("01/02/2006"), PercentIncrease: percentIncrease}
+
+		// Packing response as type JSON
+		jsonResponse, err := json.Marshal(response)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		// Write JSON response
+		w.Write(jsonResponse)
+
 	}
-
-	// Setting headers
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	// Setting response map to be the weekly value map created in the loop
-	response := BestDayResponse{Ticker: ticker, Date: date.Format("01/02/2006"), PercentIncrease: percentIncrease}
-
-	// Packing response as type JSON
-	jsonResponse, err := json.Marshal(response)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	// Write JSON response
-	w.Write(jsonResponse)
-
 }

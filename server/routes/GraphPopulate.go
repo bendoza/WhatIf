@@ -84,86 +84,133 @@ func (h DBRouter) GraphPopulate(w http.ResponseWriter, r *http.Request) {
 	sqlBuyDate := buy.Format("02-Jan-06")
 	sqlSellDate := sell.Format("02-Jan-06")
 
-	// SQL Query that selects weekly average prices for cryptocurrencies in users portfolio, so that we can use the amount
-	// they specified they owned of each crypto to calculate total weekly average portfolio value
-	query := `SELECT Ticker, TRUNC(CryptoDate, 'IW') AS WeekStart, AVG(Price) AS WeeklyAverageValue 
+	query := `SELECT MIN(CryptoDate)
 			  FROM "B.MENDOZA"."DAILYCRYPTOS"
-			  WHERE Ticker IN ` + TickerString + ` AND CryptoDate BETWEEN :startDate AND :endDate 
-		  	  GROUP BY Ticker, TRUNC(CryptoDate, 'IW')
-			  ORDER BY TRUNC(CryptoDate, 'IW'), Ticker ASC`
+			  WHERE Ticker IN ` + TickerString + `
+			  GROUP BY CryptoDate
+			  ORDER BY CryptoDate ASC
+			  FETCH FIRST 1 ROWS ONLY`
 
-	result, err := h.DB.Query(query, sql.Named("startDate", sqlBuyDate), sql.Named("endDate", sqlSellDate))
+	result, err := h.DB.Query(query)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer result.Close()
 
-	// Initializing an index and prev date value for the loop to be more easily taken advantage of
-	var index int = 0
-	var previousTupleDate time.Time
+	// Initializing variables to store information from table row scan
+	var firstDate time.Time
 
-	// Initializing portfolioValue for each coins average weekly value to be added to and ultimately used
-	// as the value that is inserted into the map once all coins for each week have been added
-	var portfolioValue float64 = 0
-
-	// Initializing map for date(key) and weeklyAVGPortfolioValue(value) to be returned to the front end
-	// for graph population
-	weeklyValue := make(map[string]float64)
-
-	for result.Next() {
-		var ticker string
-		var weekStart time.Time
-		var weeklyAvgValue float64
-
-		err := result.Scan(&ticker, &weekStart, &weeklyAvgValue)
+	// Scanning the one row that is turned by the SQL Query
+	if result.Next() {
+		err = result.Scan(&firstDate)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		// Multiplying the average value of the ticker by the amount owned by the user to determine
-		// the average worth of each crypto for the week.
-		// Then adding that average worth of each crypto together to get a total average portfolio value of the week
-
-		if index == 0 {
-			portfolioValue += TickerValueMap[ticker] * weeklyAvgValue
-		}
-		if previousTupleDate != weekStart && index != 0 {
-			weeklyValue[previousTupleDate.Format("2006-01-02")] = portfolioValue
-			portfolioValue = 0
-			portfolioValue += TickerValueMap[ticker] * weeklyAvgValue
-		} else if index != 0 {
-			portfolioValue += TickerValueMap[ticker] * weeklyAvgValue
-		}
-		previousTupleDate = weekStart
-		index++
-	}
-	weeklyValue[previousTupleDate.Format("2006-01-02")] = portfolioValue
-
-	// Initializing a new string slice to enable the key's of the map to be sorted
-	allDates := make([]string, 0, len(weeklyValue))
-	for v := range weeklyValue {
-		allDates = append(allDates, v)
-	}
-
-	// Sort the slice of keys
-	sort.Strings(allDates)
-
-	// Create a new map with sorted keys
-	sortedResponse := make(map[string]float64)
-	for _, k := range allDates {
-		sortedResponse[k] = weeklyValue[k]
-	}
-
-	// Setting headers
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	// Packing sorted response as type JSON
-	jsonResponse, err := json.Marshal(sortedResponse)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	} else {
+		http.Error(w, "No results found", http.StatusNotFound)
 		return
 	}
-	// Write JSON response
-	w.Write(jsonResponse)
+
+	if firstDate.After(sell) {
+
+		sortedResponse := make(map[string]float64)
+
+		// Setting headers
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		// Packing sorted response as type JSON
+		jsonResponse, err := json.Marshal(sortedResponse)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		// Write JSON response
+		w.Write(jsonResponse)
+
+	} else {
+
+		// SQL Query that selects weekly average prices for cryptocurrencies in users portfolio, so that we can use the amount
+		// they specified they owned of each crypto to calculate total weekly average portfolio value
+		query2 := `SELECT Ticker, TRUNC(CryptoDate, 'IW') AS WeekStart, AVG(Price) AS WeeklyAverageValue 
+				   FROM "B.MENDOZA"."DAILYCRYPTOS"
+			       WHERE Ticker IN ` + TickerString + ` AND CryptoDate BETWEEN :startDate AND :endDate 
+		  	       GROUP BY Ticker, TRUNC(CryptoDate, 'IW')
+			       ORDER BY TRUNC(CryptoDate, 'IW'), Ticker ASC`
+
+		result2, err := h.DB.Query(query2, sql.Named("startDate", sqlBuyDate), sql.Named("endDate", sqlSellDate))
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer result2.Close()
+
+		// Initializing an index and prev date value for the loop to be more easily taken advantage of
+		var index int = 0
+		var previousTupleDate time.Time
+
+		// Initializing portfolioValue for each coins average weekly value to be added to and ultimately used
+		// as the value that is inserted into the map once all coins for each week have been added
+		var portfolioValue float64 = 0
+
+		// Initializing map for date(key) and weeklyAVGPortfolioValue(value) to be returned to the front end
+		// for graph population
+		weeklyValue := make(map[string]float64)
+
+		for result2.Next() {
+			var ticker string
+			var weekStart time.Time
+			var weeklyAvgValue float64
+
+			err := result2.Scan(&ticker, &weekStart, &weeklyAvgValue)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			// Multiplying the average value of the ticker by the amount owned by the user to determine
+			// the average worth of each crypto for the week.
+			// Then adding that average worth of each crypto together to get a total average portfolio value of the week
+
+			if index == 0 {
+				portfolioValue += TickerValueMap[ticker] * weeklyAvgValue
+			}
+			if previousTupleDate != weekStart && index != 0 {
+				weeklyValue[previousTupleDate.Format("2006-01-02")] = portfolioValue
+				portfolioValue = 0
+				portfolioValue += TickerValueMap[ticker] * weeklyAvgValue
+			} else if index != 0 {
+				portfolioValue += TickerValueMap[ticker] * weeklyAvgValue
+			}
+			previousTupleDate = weekStart
+			index++
+		}
+		weeklyValue[previousTupleDate.Format("2006-01-02")] = portfolioValue
+
+		// Initializing a new string slice to enable the key's of the map to be sorted
+		allDates := make([]string, 0, len(weeklyValue))
+		for v := range weeklyValue {
+			allDates = append(allDates, v)
+		}
+
+		// Sort the slice of keys
+		sort.Strings(allDates)
+
+		// Create a new map with sorted keys
+		sortedResponse := make(map[string]float64)
+		for _, k := range allDates {
+			sortedResponse[k] = weeklyValue[k]
+		}
+
+		// Setting headers
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		// Packing sorted response as type JSON
+		jsonResponse, err := json.Marshal(sortedResponse)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		// Write JSON response
+		w.Write(jsonResponse)
+	}
 }
