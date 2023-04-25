@@ -3,6 +3,7 @@ package routes
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"sort"
@@ -86,100 +87,153 @@ func (h DBRouter) WorstSellDay(w http.ResponseWriter, r *http.Request) {
 	sqlBuyDate := buy.Format("02-Jan-06")
 	sqlSellDate := sell.Format("02-Jan-06")
 
-	// SQL Query that selects the name, date, and price of all cryptos selected by the user within the given date range.
-	query := `SELECT Ticker, CryptoDate, Price
+	query := `SELECT MIN(CryptoDate)
 			  FROM "B.MENDOZA"."DAILYCRYPTOS"
-	  		  WHERE Ticker IN ` + TickerString + ` AND CryptoDate BETWEEN :startDate AND :endDate 
-	  		  GROUP BY Ticker, CryptoDate, Price
-	  		  ORDER BY CryptoDate ASC`
+			  WHERE Ticker IN ` + TickerString + `
+			  GROUP BY CryptoDate
+			  ORDER BY CryptoDate ASC
+			  FETCH FIRST 1 ROWS ONLY`
 
-	result, err := h.DB.Query(query, sql.Named("startDate", sqlBuyDate), sql.Named("endDate", sqlSellDate))
+	result, err := h.DB.Query(query)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer result.Close()
 
-	// Initializing an index and a bool for the loop to be more easily taken advantage of
-	var index int = 0
-	var first bool = true
-	var previousTupleDate time.Time
+	// Initializing variables to store information from table row scan
+	var firstDate time.Time
 
-	// Initializing dailyPortfolioValue and the map for the total portfolio value of each day where the day
-	// is the key and the value of the portfolio on that day is the value of the key
-	var dailyPortfolioValue float64 = 0
-	dailyValues := make(map[string]float64)
-
-	// Initializing an initial value which will eventually be replaced with the total portfolio value from the first day
-	var initialValue float64 = 0
-
-	// Looping through all tuples from within the date range
-	for result.Next() {
-		var ticker string
-		var date time.Time
-		var dailyValue float64
-
-		err := result.Scan(&ticker, &date, &dailyValue)
+	// Scanning the one row that is turned by the SQL Query
+	if result.Next() {
+		err = result.Scan(&firstDate)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		// Condition that allows the loop to switch from day to day by checking if the date is not equal to the date of the previous
-		// tuple and if the loop is not on the first iteration, because then the previousTupleDate is null and not equal to the non-exist
-		// previous tuple's date
-		if index == 0 {
-			dailyPortfolioValue += TickerValueMap[ticker] * dailyValue
-		}
-		if previousTupleDate != date && index != 0 {
-			if first {
-				initialValue = dailyPortfolioValue
-				first = false
-			}
-			dailyValues[previousTupleDate.Format("01/02/2006")] = dailyPortfolioValue
-			dailyPortfolioValue = 0
-			dailyPortfolioValue += TickerValueMap[ticker] * dailyValue
-		} else if index != 0 {
-			dailyPortfolioValue += TickerValueMap[ticker] * dailyValue
-		}
-		previousTupleDate = date
-		index++
-	}
-	dailyValues[previousTupleDate.Format("01/02/2006")] = dailyPortfolioValue
-
-	// Now checking for the map value that has the absolute least of all potentially daily portfolio values and storing
-	// both the date and value in variables to be returned
-	var leastDate string
-	var leastValue float64 = 0
-
-	for date, value := range dailyValues {
-		if leastValue == 0 || value < leastValue {
-			leastDate = date
-			leastValue = value
-		}
-	}
-
-	// Calculating the percentage difference between the portfolio value of the first day selected and the value of the day with the least portfolio value
-	var percentDifference float64 = ((leastValue - initialValue) / initialValue) * 100
-
-	// Establishing a response template
-	type WorstSellResponse struct {
-		Date              string  `json: "date"`
-		PercentDifference float64 `json: "percentdifference"`
-	}
-
-	// Setting headers
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	// Setting response map to be the weekly value map created in the loop
-	response := WorstSellResponse{Date: leastDate, PercentDifference: percentDifference}
-
-	// Packing response as type JSON
-	jsonResponse, err := json.Marshal(response)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	} else {
+		http.Error(w, "No results found", http.StatusNotFound)
 		return
 	}
 
-	// Write JSON response
-	w.Write(jsonResponse)
+	if firstDate.After(sell) {
+
+		type WorstSellResponse struct {
+			Date              string  `json: "date"`
+			PercentDifference float64 `json: "percentdifference"`
+		}
+
+		// Setting headers
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		// Setting response map to be the weekly value map created in the loop
+		response := WorstSellResponse{Date: "Selected Cryptos contain no data within the date range selected.", PercentDifference: 0}
+
+		// Packing response as type JSON
+		jsonResponse, err := json.Marshal(response)
+		if err != nil {
+			fmt.Println("piss")
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		// Write JSON response
+		w.Write(jsonResponse)
+	} else {
+		// SQL Query that selects the name, date, and price of all cryptos selected by the user within the given date range.
+		query2 := `SELECT Ticker, CryptoDate, Price
+				   	   FROM "B.MENDOZA"."DAILYCRYPTOS"
+	  			       WHERE Ticker IN ` + TickerString + ` AND CryptoDate BETWEEN :startDate AND :endDate 
+	  			       GROUP BY Ticker, CryptoDate, Price
+	  			       ORDER BY CryptoDate ASC`
+
+		result2, err := h.DB.Query(query2, sql.Named("startDate", sqlBuyDate), sql.Named("endDate", sqlSellDate))
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer result2.Close()
+
+		// Initializing an index and a bool for the loop to be more easily taken advantage of
+		var index int = 0
+		var first bool = true
+		var previousTupleDate time.Time
+
+		// Initializing dailyPortfolioValue and the map for the total portfolio value of each day where the day
+		// is the key and the value of the portfolio on that day is the value of the key
+		var dailyPortfolioValue float64 = 0
+		dailyValues := make(map[string]float64)
+
+		// Initializing an initial value which will eventually be replaced with the total portfolio value from the first day
+		var initialValue float64 = 0
+
+		// Looping through all tuples from within the date range
+		for result2.Next() {
+			var ticker string
+			var date time.Time
+			var dailyValue float64
+
+			err := result2.Scan(&ticker, &date, &dailyValue)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			// Condition that allows the loop to switch from day to day by checking if the date is not equal to the date of the previous
+			// tuple and if the loop is not on the first iteration, because then the previousTupleDate is null and not equal to the non-exist
+			// previous tuple's date
+			if index == 0 {
+				dailyPortfolioValue += TickerValueMap[ticker] * dailyValue
+			}
+			if previousTupleDate != date && index != 0 {
+				if first {
+					initialValue = dailyPortfolioValue
+					first = false
+				}
+				dailyValues[previousTupleDate.Format("01/02/2006")] = dailyPortfolioValue
+				dailyPortfolioValue = 0
+				dailyPortfolioValue += TickerValueMap[ticker] * dailyValue
+			} else if index != 0 {
+				dailyPortfolioValue += TickerValueMap[ticker] * dailyValue
+			}
+			previousTupleDate = date
+			index++
+
+		}
+		dailyValues[previousTupleDate.Format("01/02/2006")] = dailyPortfolioValue
+
+		// Now checking for the map value that has the absolute least of all potentially daily portfolio values and storing
+		// both the date and value in variables to be returned
+		var leastDate string
+		var leastValue float64 = 0
+
+		for date, value := range dailyValues {
+			if leastValue == 0 || value < leastValue {
+				leastDate = date
+				leastValue = value
+			}
+		}
+
+		// Calculating the percentage difference between the portfolio value of the first day selected and the value of the day with the least portfolio value
+		var percentDifference float64 = ((leastValue - initialValue) / initialValue) * 100
+
+		// Establishing a response template
+		type WorstSellResponse struct {
+			Date              string  `json: "date"`
+			PercentDifference float64 `json: "percentdifference"`
+		}
+
+		// Setting headers
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		// Setting response map to be the weekly value map created in the loop
+		response := WorstSellResponse{Date: leastDate, PercentDifference: percentDifference}
+
+		// Packing response as type JSON
+		jsonResponse, err := json.Marshal(response)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		// Write JSON response
+		w.Write(jsonResponse)
+	}
 }

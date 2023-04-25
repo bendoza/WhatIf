@@ -85,8 +85,59 @@ func (h DBRouter) BetterCoinInvestments(w http.ResponseWriter, r *http.Request) 
 	sqlBuyDate := buy.Format("02-Jan-06")
 	sqlSellDate := sell.Format("02-Jan-06")
 
-	// SQL Query that selects all tickers within the users profile and each cryptos percent difference from the start to the end date
-	query := `SELECT A.Ticker, ((B.Price - A.Price) / A.Price) * 100 AS PercentDifference
+	query := `SELECT MIN(CryptoDate)
+			  FROM "B.MENDOZA"."DAILYCRYPTOS"
+			  WHERE Ticker IN ` + TickerString + `
+			  GROUP BY CryptoDate
+			  ORDER BY CryptoDate ASC
+			  FETCH FIRST 1 ROWS ONLY`
+
+	result, err := h.DB.Query(query)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer result.Close()
+
+	// Initializing variables to store information from table row scan
+	var firstDate time.Time
+
+	// Scanning the one row that is turned by the SQL Query
+	if result.Next() {
+		err = result.Scan(&firstDate)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		http.Error(w, "No results found", http.StatusNotFound)
+		return
+	}
+
+	if firstDate.After(sell) {
+
+		var NewTickers []string
+		var placeholder string = "No data in range:X|No data in range:X"
+
+		NewTickers = append(NewTickers, placeholder)
+		NewTickers = append(NewTickers, placeholder)
+		NewTickers = append(NewTickers, placeholder)
+
+		// Setting headers
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		// Packing sorted response as type JSON
+		jsonResponse, err := json.Marshal(NewTickers)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		// Write JSON response
+		w.Write(jsonResponse)
+
+	} else {
+
+		// SQL Query that selects all tickers within the users profile and each cryptos percent difference from the start to the end date
+		query := `SELECT A.Ticker, ((B.Price - A.Price) / A.Price) * 100 AS PercentDifference
 			  FROM "B.MENDOZA"."DAILYCRYPTOS" A
 			  JOIN "B.MENDOZA"."DAILYCRYPTOS" B ON A.Ticker = B.Ticker
 			  WHERE A.CryptoDate = :startDate AND B.CryptoDate = :endDate
@@ -94,40 +145,38 @@ func (h DBRouter) BetterCoinInvestments(w http.ResponseWriter, r *http.Request) 
 			  AND A.Price <> 0
 			  ORDER BY A.Ticker ASC`
 
-	result, err := h.DB.Query(query, sql.Named("startDate", sqlBuyDate), sql.Named("endDate", sqlSellDate))
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer result.Close()
-
-	// Initializing string slice to hold all owned ticker and amount held pairs in a string
-	// Format -> BTC:120.020
-	var OwnedTickers []string
-
-	// Initialzing placeholder and index to make use of the loop
-	var placeholder string
-	var index int = 0
-
-	// Looping through 5 results rows and formatting them to be correctly sent back to the front end
-	for result.Next() {
-		var ticker string
-		var percentDifference float64
-
-		err := result.Scan(&ticker, &percentDifference)
+		result, err := h.DB.Query(query, sql.Named("startDate", sqlBuyDate), sql.Named("endDate", sqlSellDate))
 		if err != nil {
 			log.Fatal(err)
 		}
+		defer result.Close()
 
-		percentDiffString := fmt.Sprintf("%f", percentDifference)
-		placeholder = ticker + ":" + percentDiffString
+		// Initializing string slice to hold all owned ticker and amount held pairs in a string
+		// Format -> BTC:120.020
+		var OwnedTickers []string
 
-		OwnedTickers = append(OwnedTickers, placeholder)
-		index++
-	}
+		// Initialzing placeholder and index to make use of the loop
+		var placeholder string
 
-	// SQL Query that selects crypto name and overall percent difference from the start date to the end date of the
-	// cryptos with the top 5 highest % differences that are higher than any crypto within the portfolio.
-	query = `SELECT A.Ticker, ((B.Price - A.Price) / A.Price) * 100 AS PercentDifference
+		// Looping through 5 results rows and formatting them to be correctly sent back to the front end
+		for result.Next() {
+			var ticker string
+			var percentDifference float64
+
+			err := result.Scan(&ticker, &percentDifference)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			percentDiffString := fmt.Sprintf("%f", percentDifference)
+			placeholder = ticker + ":" + percentDiffString
+
+			OwnedTickers = append(OwnedTickers, placeholder)
+		}
+
+		// SQL Query that selects crypto name and overall percent difference from the start date to the end date of the
+		// cryptos with the top 5 highest % differences that are higher than any crypto within the portfolio.
+		query = `SELECT A.Ticker, ((B.Price - A.Price) / A.Price) * 100 AS PercentDifference
 			  FROM DAILYCRYPTOS A
 			  JOIN DAILYCRYPTOS B ON A.Ticker = B.Ticker
 			  WHERE A.CryptoDate = :startDate AND B.CryptoDate = :endDate
@@ -144,65 +193,64 @@ func (h DBRouter) BetterCoinInvestments(w http.ResponseWriter, r *http.Request) 
 			  ORDER BY PercentDifference DESC
 			  FETCH FIRST 3 ROWS ONLY`
 
-	result, err = h.DB.Query(query, sql.Named("startDate", sqlBuyDate), sql.Named("endDate", sqlSellDate))
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer result.Close()
-
-	// Initializing a string slice for all new formatted strings with data
-	var NewTickers []string
-	index = 0
-
-	// Looping through 5 results rows and formatting them to be correctly sent back to the front end
-	for result.Next() {
-		var ticker string
-		var percentDifference float64
-
-		err := result.Scan(&ticker, &percentDifference)
+		result, err = h.DB.Query(query, sql.Named("startDate", sqlBuyDate), sql.Named("endDate", sqlSellDate))
 		if err != nil {
 			log.Fatal(err)
 		}
+		defer result.Close()
 
-		percentDiffString := fmt.Sprintf("%f", percentDifference)
-		placeholder = ticker + ":" + percentDiffString
+		// Initializing a string slice for all new formatted strings with data
+		var NewTickers []string
 
-		NewTickers = append(NewTickers, placeholder)
-		index++
-	}
+		// Looping through 5 results rows and formatting them to be correctly sent back to the front end
+		for result.Next() {
+			var ticker string
+			var percentDifference float64
 
-	// Initializing variables to compare the owned tickers to the tickers who's percent difference was greater than a crypto in the portfolio
-	var previousTickerValue string
-	var previousValue float64 = 0
+			err := result.Scan(&ticker, &percentDifference)
+			if err != nil {
+				log.Fatal(err)
+			}
 
-	// Loop that determines which crypto had the least percent difference, therefore it was most outperformed, or it underperformed the most
-	for tick := range OwnedTickers {
-		tokens := strings.Split(OwnedTickers[tick], ":")
-		tokensFloat, err := strconv.ParseFloat(tokens[1], 64)
-		if err != nil {
-			log.Fatal(err)
+			percentDiffString := fmt.Sprintf("%f", percentDifference)
+			placeholder = ticker + ":" + percentDiffString
+
+			NewTickers = append(NewTickers, placeholder)
 		}
-		if previousValue == 0 || tokensFloat < previousValue {
-			previousValue = tokensFloat
-			previousTickerValue = OwnedTickers[tick]
-		}
-		if tick == len(OwnedTickers)-1 {
-			for i := 0; i < len(NewTickers); i++ {
-				NewTickers[i] = NewTickers[i] + "|" + previousTickerValue
+
+		// Initializing variables to compare the owned tickers to the tickers who's percent difference was greater than a crypto in the portfolio
+		var previousTickerValue string
+		var previousValue float64 = 0
+
+		// Loop that determines which crypto had the least percent difference, therefore it was most outperformed, or it underperformed the most
+		for tick := range OwnedTickers {
+			tokens := strings.Split(OwnedTickers[tick], ":")
+			tokensFloat, err := strconv.ParseFloat(tokens[1], 64)
+			if err != nil {
+				log.Fatal(err)
+			}
+			if previousValue == 0 || tokensFloat < previousValue {
+				previousValue = tokensFloat
+				previousTickerValue = OwnedTickers[tick]
+			}
+			if tick == len(OwnedTickers)-1 {
+				for i := 0; i < len(NewTickers); i++ {
+					NewTickers[i] = NewTickers[i] + "|" + previousTickerValue
+				}
 			}
 		}
-	}
 
-	// Setting headers
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+		// Setting headers
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
 
-	// Packing NewTickers as type JSON for response
-	jsonResponse, err := json.Marshal(NewTickers)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		// Packing NewTickers as type JSON for response
+		jsonResponse, err := json.Marshal(NewTickers)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		// Write JSON response
+		w.Write(jsonResponse)
 	}
-	// Write JSON response
-	w.Write(jsonResponse)
 }
