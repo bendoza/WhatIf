@@ -9,20 +9,20 @@ function Follow() {
     {
       name: 'Sergio Arcila',
       position: 'Frontend Developer',
-      bio: 'Sergio is a software engineer with over 10 years of experience. He is responsible for leading the front end team and ensuring the project stays on track.',
-      image: 'https://via.placeholder.com/150',
+      bio: 'Sergio is a Computer Science student with over 2 years of experience. He is responsible for leading the front end team and ensuring the project stays on track.',
+      image: 'pictures/serg.png',
     },
     {
       name: 'Benjamin Mendoza',
       position: 'Backend Developer',
       bio: 'Ben is a skilled backend developer who specializes in creating efficient and scalable APIs. He has a strong background in Golang and is responsible for leading the back end team.',
-      image: 'https://via.placeholder.com/150',
+      image: 'pictures/ben_headshot.png',
     },
     {
       name: 'Eldhose Salby',
       position: 'Backend Developer',
-      bio: 'Bob is a dedicated DevOps engineer with a deep understanding of cloud infrastructure and automation. He ensures the smooth deployment and maintenance of the project.',
-      image: 'https://via.placeholder.com/150',
+      bio: 'Eldhose is an engineer with an understanding of both back end and front end, and he assisted with both.',
+      image: 'pictures/IMG_0276.jpg',
     },
   ];
 

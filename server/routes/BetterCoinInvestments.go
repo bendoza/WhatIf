@@ -170,12 +170,12 @@ func (h DBRouter) BetterCoinInvestments(w http.ResponseWriter, r *http.Request) 
 
 		// SQL Query that selects crypto name and overall percent difference from the start date to the end date of the
 		// cryptos with the top 5 highest % differences that are higher than any crypto within the portfolio.
-		query = `SELECT A.Ticker, ((B.Price - A.Price) / A.Price) * 100 AS PercentDifference
+		query = `SELECT B.Ticker, ((B.Price - A.Price) / A.Price) * 100 AS PercentDifference
 			  FROM DAILYCRYPTOS A
 			  JOIN DAILYCRYPTOS B ON A.Ticker = B.Ticker
 			  WHERE A.CryptoDate = :startDate AND B.CryptoDate = :endDate
-			  AND A.Ticker NOT IN ` + TickerString + `
-			  AND A.Price <> 0
+			  AND B.Ticker NOT IN ` + TickerString + `
+			  AND B.Price <> 0
 			  AND ((B.Price - A.Price) / A.Price) > ( SELECT MIN((B.Price - A.Price) / A.Price)
 			  										  FROM DAILYCRYPTOS A
 			  										  JOIN DAILYCRYPTOS B ON A.Ticker = B.Ticker
