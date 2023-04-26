@@ -114,16 +114,25 @@ const ComparePage: React.FC = () => {
     })
     .then(response => response.json())
     .then(data => {
-      for (let i = 0; i < data.length; i++) {
-        var split = data[i].split("|", 2);
-        var newTicker = split[0].split(":", 2);
-        var ownedTicker = split[1].split(":", 2);
+      if (data == null) {
         updatedTopOutperformers.push({
-          NewTicker: newTicker[0],
-          NewTickerPctDiff: +newTicker[1],
-          OwnedTicker: ownedTicker[0],
-          OwnedTickerPctDiff: +ownedTicker[1]
+          NewTicker: "Failed",
+          NewTickerPctDiff: 0,
+          OwnedTicker: "Failed",
+          OwnedTickerPctDiff: 0
         });
+      } else {
+        for (let i = 0; i < data.length; i++) {
+          var split = data[i].split("|", 2);
+          var newTicker = split[0].split(":", 2);
+          var ownedTicker = split[1].split(":", 2);
+          updatedTopOutperformers.push({
+            NewTicker: newTicker[0],
+            NewTickerPctDiff: +newTicker[1],
+            OwnedTicker: ownedTicker[0],
+            OwnedTickerPctDiff: +ownedTicker[1]
+          });
+        }
       }
       setTopOutperformers(updatedTopOutperformers);
     })
