@@ -11,8 +11,6 @@ Whether you're an experienced cryptocurrency investor or just starting out, What
 ## Collaborators
 
 - [Benjamin Mendoza](https://www.github.com/benmendoza3)
-- [Phillip Hurm](https://github.com/PhillipHurm)
-- [Eldhose Salby](https://github.com/eldhose1998)
 - [Sergio Arcila](https://github.com/SergArcila)
 
 ## To Install WhatIf On Your Machine
